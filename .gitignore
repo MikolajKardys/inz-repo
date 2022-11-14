@@ -1,1 +1,4 @@
 .idea
+services/visualization/node_modules
+services/visualization/package-lock.json
+services/visualization/public/data/*
