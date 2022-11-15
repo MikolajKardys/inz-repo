@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 
 public abstract class AbstractAdapter {
     protected void runCommands(String command, String errorString) throws Exception {
-        Process p = Runtime.getRuntime().exec(String.format("cmd.exe /c start cmd /c \"%s & pause\"", command));
+        Process p = Runtime.getRuntime().exec(String.format("%s", command));
         BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
         char c = (char) r.read();

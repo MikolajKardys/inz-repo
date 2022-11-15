@@ -19,7 +19,7 @@ public class VisualizationAdapter extends AbstractAdapter{
     }
 
     public void runVisualization() throws Exception {
-        String command = "npm.cmd start --prefix " + this.vizPath + " " + this.nodePath;
+        String command = "npm start --prefix " + this.vizPath + " " + this.nodePath;
 
         this.runCommands(command, "An error has occurred in VisualizationAdapter:\n");
     }
