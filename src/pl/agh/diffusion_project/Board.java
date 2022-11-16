@@ -56,23 +56,6 @@ public class Board {
                     cells[i][j][k].update();
     }
 
-    public void addWind(Wind wind){
-        wind.wind(cells , width, length, height);
-    }
-
-    public void updateWindWithFunction(WindUpdate windUpdate) {
-        for(int i=0; i<width; i++)
-            for(int j=0; j<length; j++)
-                for(int k=0; k<height; k++)
-                    windUpdate.update(cells, i, j, k, time);
-
-        for(int i=0; i<width; i++)
-            for(int j=0; j<length; j++)
-                for(int k=0; k<height; k++)
-                    cells[i][j][k].update();
-        time++;
-    }
-
     public Pollution[][][] get3DConcentrationMatrix() {
         Pollution[][][] newPollution = new Pollution[width][length][height];
 

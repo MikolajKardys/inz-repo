@@ -9,63 +9,6 @@ import java.util.List;
 //TODO: calculate neighbours here, not get from cell
 
 public class SimpleUpdate extends CallableUpdate {
-    static private final int [][] neighbors = {
-            { 1,  1,  1},
-            { 1,  1, -1},
-            { 1, -1,  1},
-            { 1, -1, -1},
-            {-1,  1,  1},
-            {-1,  1, -1},
-            {-1, -1,  1},
-            {-1, -1, -1},
-            { 0,  1,  1},
-            { 0,  1, -1},
-            { 0, -1,  1},
-            { 0, -1, -1},
-            { 1,  0,  1},
-            { 1,  0, -1},
-            {-1,  0,  1},
-            {-1,  0, -1},
-            { 1,  1,  0},
-            { 1, -1,  0},
-            {-1,  1,  0},
-            {-1, -1,  0},
-            { 0,  0,  1},
-            { 0,  0, -1},
-            { 0,  1,  0},
-            { 0, -1,  0},
-            { 1,  0,  0},
-            {-1,  0,  0},
-
-    };
-    static private final float [] neighborsCoefficient = {
-            0.577350f,
-            0.577350f,
-            0.577350f,
-            0.577350f,
-            0.577350f,
-            0.577350f,
-            0.577350f,
-            0.577350f,
-            0.7071f,
-            0.7071f,
-            0.7071f,
-            0.7071f,
-            0.7071f,
-            0.7071f,
-            0.7071f,
-            0.7071f,
-            0.7071f,
-            0.7071f,
-            0.7071f,
-            0.7071f,
-            1.0f,
-            1.0f,
-            1.0f,
-            1.0f,
-            1.0f,
-            1.0f
-    };
     float[][][] neighborsCoefficientSum;
     static List<Float> t2 = Arrays.asList(1.0f);
 //    static List<Float> t2 = Arrays.asList(1.0f,1.0f,1.0f,1.0f,1.0f,1.0f);

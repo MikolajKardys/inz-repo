@@ -96,13 +96,8 @@ public class Configuration {
         callableUpdate.setup(width, length, height);
     }
 
-
     public void iterateDiffusion(CallableUpdate callableUpdate) {
         board.updateWithFunction(callableUpdate);
-    }
-
-    public void iterateWind(WindUpdate windUpdate) {
-        board.updateWindWithFunction(windUpdate);
     }
 
 //    public void iterateAbsorption(AbsorptionUpdate simpleAbsorptionUpdate) {
@@ -113,14 +108,12 @@ public class Configuration {
 //        board.updateDecay();
 //    }
 
-    public void iterate(CallableUpdate callableUpdate, WindUpdate windUpdate) {
+    public void iterate(CallableUpdate callableUpdate) {
         board.updateWithFunction(callableUpdate);
-        board.updateWindWithFunction(windUpdate);
     }
 
-    public void iterate(CallableUpdate callableUpdate, WindUpdate windUpdate, AbsorptionUpdate simpleAbsorptionUpdate) {
+    public void iterate(CallableUpdate callableUpdate, AbsorptionUpdate simpleAbsorptionUpdate) {
         board.updateWithFunction(callableUpdate);
-        board.updateWindWithFunction(windUpdate);
 //        board.updateAbsorption(simpleAbsorptionUpdate);
 //        board.updateDecay();
     }
