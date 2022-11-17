@@ -93,7 +93,7 @@ public class Configuration {
 //    }
 
     public void setupDiffusion(CallableUpdate callableUpdate) {
-        callableUpdate.setup(width, length, height);
+        board.setupDiffusion(callableUpdate);
     }
 
 

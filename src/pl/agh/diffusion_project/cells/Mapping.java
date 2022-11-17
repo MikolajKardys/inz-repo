@@ -11,12 +11,14 @@ public class Mapping {
     private final Integer cellTypeCount;
     private final Integer pollutionTypeCount;
 
+    private final List<List<Integer>> indexMatrix;
     private final List<List<Boolean>> containsMatrix;
     private final List<List<List<Pair<Integer, Integer>>>> mappingMatrix;
 
     public Mapping(Integer cellTypeCount, Integer pollutionTypeCount, List<List<Boolean>> containsMatrix) {
         this.cellTypeCount = cellTypeCount;
         this.pollutionTypeCount = pollutionTypeCount;
+        this.indexMatrix =  new ArrayList(cellTypeCount);
         this.containsMatrix = containsMatrix;
         this.mappingMatrix = new ArrayList<>(Collections.nCopies(cellTypeCount, null));
         for (int i = 0; i < cellTypeCount; i++) {
@@ -43,7 +45,16 @@ public class Mapping {
                     }
                 }
             }
+            indexMatrix.add(new ArrayList(mappingMatrix.get(i).get(i).size()));
+            for (int k = 0; k < pollutionTypeCount; k++) {
+                if (containsMatrix.get(i).get(k))
+                    indexMatrix.get(i).add(k);
+            }
         }
+    }
+
+    public List<Integer> getIndexMatrix(Integer type) {
+        return indexMatrix.get(type);
     }
 
     public List<Boolean> getContainsMatrix(Integer type) {
@@ -56,6 +67,10 @@ public class Mapping {
 
     public Integer getCellTypeCount() {
         return cellTypeCount;
+    }
+
+    public Integer getCellTypeSize(Integer type) {
+        return indexMatrix.get(type).size();
     }
 
     public Integer getPollutionTypeCount() {

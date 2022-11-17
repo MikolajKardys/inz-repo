@@ -22,17 +22,17 @@ public class Run {
     public static void main(String[] args) {
         //Permutations test
 
-        Mapping mapping = new Mapping(1,1,
+        Mapping mapping = new Mapping(2,2,
                 new ArrayList<>(
                         Arrays.asList(
 //                                new ArrayList<>(Arrays.asList(true, true, false, true, false, true)),
-//                                new ArrayList<>(Arrays.asList(true, false, true, true, true, true))
-                                new ArrayList<>(Arrays.asList(true))
+                                new ArrayList<>(Arrays.asList(true,false)),
+                                new ArrayList<>(Arrays.asList(true,true))
                         )));
 
         List<Quartet<Integer, Integer, Integer, Pollution>> initialCondition = new ArrayList<>();
 //        initialCondition.add(new Quartet<>(2, 3, 3, new Pollution(Arrays.asList(1.0f,1.0f,1.0f,1.0f,1.0f,1.0f))));
-        initialCondition.add(new Quartet<>(2, 3, 3, new Pollution(Arrays.asList(1.0f))));
+        initialCondition.add(new Quartet<>(2, 3, 3, new Pollution(Arrays.asList(1.0f, 2.0f))));
         Configuration configuration = new Configuration(4, 4, 4, initialCondition, mapping);
         SimpleUpdate simpleUpdate = new SimpleUpdate();
         configuration.setupDiffusion(simpleUpdate);
