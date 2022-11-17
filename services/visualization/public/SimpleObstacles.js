@@ -1,4 +1,10 @@
-import * as THREE from 'three'
+import { Float32BufferAttribute } from 'three'
+import { Vector3 } from 'three'
+import {  InstancedBufferGeometry } from 'three'
+import { InstancedBufferAttribute } from 'three'
+import { BoxBufferGeometry } from 'three'
+import { Mesh } from 'three'
+import { ShaderMaterial } from 'three'
 
 import { scene, initScene } from "./Main.js";
 
@@ -37,26 +43,29 @@ class SimpleObstacles {
             gl_FragColor = vec4(v_color, 1.);
         }`
 
-    static getTypeColor(type){
-        switch (type) {
-            case 0: return new THREE.Vector3(125.0 / 255.0, 125.0 / 255.0, 125.0 / 255.0)
-            case 1: return new THREE.Vector3(252.0 / 255.0, 3.0 / 255.0, 3.0 / 255.0)
-            case 2: return new THREE.Vector3(100.0 / 255.0, 100.0 / 255.0, 100.0 / 255.0)
-        }
-    }
-
     static _addObstacleGeneric(x_dim, y_dim, z_dim, positions, sizes, types, boxGeo){
-        const buildVertexColorArrayFace = function (r, g, b) {
+        const hexToRgb = function (hex) {
+            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        const buildVertexColorArrayFace = function (color_str) {
+            let color = hexToRgb(color_str)
+
             return [
-                r, g, b,
-                r, g, b,
-                r, g, b,
-                r, g, b
+                color.r / 255., color.g / 255., color.b / 255.,
+                color.r / 255., color.g / 255., color.b / 255.,
+                color.r / 255., color.g / 255., color.b / 255.,
+                color.r / 255., color.g / 255., color.b / 255.
             ]
         }
 
 
-        const cubeGeo = new THREE.InstancedBufferGeometry()
+        const cubeGeo = new InstancedBufferGeometry()
         cubeGeo.index = boxGeo.index
         cubeGeo.attributes.position = boxGeo.attributes.position
 
@@ -67,12 +76,12 @@ class SimpleObstacles {
 
         let colorArray = []
         colorArray = colorArray
-            .concat(buildVertexColorArrayFace(100. / 255., 100. / 255., 100. / 255.))
-            .concat(buildVertexColorArrayFace(100. / 255., 100. / 255., 100. / 255.)) // prawo
-            .concat(buildVertexColorArrayFace(150. / 255., 150. / 255., 150. / 255.)) // gora
-            .concat(buildVertexColorArrayFace(0. / 255., 0. / 255., 0. / 255.)) // jest ok
-            .concat(buildVertexColorArrayFace(200. / 255., 200. / 255., 200. / 255.))
-            .concat(buildVertexColorArrayFace(200. / 255., 200. / 255., 200. / 255.))
+            .concat(buildVertexColorArrayFace("#003366"))
+            .concat(buildVertexColorArrayFace("#003366")) // prawo
+            .concat(buildVertexColorArrayFace("#0080ff")) // gora
+            .concat(buildVertexColorArrayFace("#000000")) // jest ok
+            .concat(buildVertexColorArrayFace("#0059b3"))
+            .concat(buildVertexColorArrayFace("#0059b3"))
 
         const x_offset = x_dim / 2;
         const y_offset = y_dim / 2;
@@ -85,11 +94,11 @@ class SimpleObstacles {
             sizesArray.push(sizes[i].x, sizes[i].y, sizes[i].z)
         }
 
-        const offsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3);
-        const orientationAttribute = new THREE.InstancedBufferAttribute(new Float32Array(orientations), 4);
+        const offsetAttribute = new InstancedBufferAttribute(new Float32Array(offsets), 3);
+        const orientationAttribute = new InstancedBufferAttribute(new Float32Array(orientations), 4);
 
-        const sizeAttribute = new THREE.InstancedBufferAttribute(new Float32Array(sizesArray), 3);
-        const colorAttribute = new THREE.Float32BufferAttribute(new Float32Array(colorArray), 3)
+        const sizeAttribute = new InstancedBufferAttribute(new Float32Array(sizesArray), 3);
+        const colorAttribute = new Float32BufferAttribute(new Float32Array(colorArray), 3)
 
         cubeGeo.setAttribute('offset', offsetAttribute);
         cubeGeo.setAttribute('orientation', orientationAttribute);
@@ -97,9 +106,9 @@ class SimpleObstacles {
         cubeGeo.setAttribute('myScale', sizeAttribute);
         cubeGeo.setAttribute('color', colorAttribute);
 
-        const material = new THREE.ShaderMaterial({
+        const material = new ShaderMaterial({
             uniforms: {
-                lightDirection: { value: new THREE.Vector3(1.0, 1.0, 1.0).normalize() }
+                lightDirection: { value: new Vector3(1.0, 1.0, 1.0).normalize() }
             },
             vertexShader: SimpleObstacles._VS,
             fragmentShader: SimpleObstacles._FS,
@@ -111,12 +120,12 @@ class SimpleObstacles {
     }
 
     static _addObstacles(x_dim, y_dim, z_dim, positions, sizes, types) {
-        const boxGeo = new THREE.BoxBufferGeometry(1, 1, 1)
+        const boxGeo = new BoxBufferGeometry(1, 1, 1)
 
         let obstacleValues =
             SimpleObstacles._addObstacleGeneric(x_dim, y_dim, z_dim, positions, sizes, types, boxGeo)
 
-        const cubeMesh = new THREE.Mesh(obstacleValues[0], obstacleValues[1]);
+        const cubeMesh = new Mesh(obstacleValues[0], obstacleValues[1]);
         scene.add(cubeMesh);
     }
 
@@ -142,8 +151,8 @@ class SimpleObstacles {
             }
 
             types.push(elements[0])
-            positions.push(new THREE.Vector3(elements[1], elements[3], elements[5]))
-            sizes.push(new THREE.Vector3(elements[2] - elements[1], elements[4] - elements[3], elements[6] - elements[5]))
+            positions.push(new Vector3(elements[1], elements[3], elements[5]))
+            sizes.push(new Vector3(elements[2] - elements[1], elements[4] - elements[3], elements[6] - elements[5]))
         }
 
         SimpleObstacles._addObstacles(x_dim, y_dim, z_dim, positions, sizes, types)

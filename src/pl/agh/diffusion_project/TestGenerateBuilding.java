@@ -14,12 +14,12 @@ public class TestGenerateBuilding {
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
 
-        FetchBuildingsAdapter buildingAdapter = new FetchBuildingsAdapter(prop.getProperty("fetch_buildings_path"));
         VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
+        FetchBuildingsAdapter buildingAdapter = new FetchBuildingsAdapter(prop.getProperty("fetch_buildings_path"));
 
         buildingAdapter.setParameter("lat-range", "0.001");
         buildingAdapter.setParameter("lon-range", "0.002");
-        //buildingAdapter.setParameter("block-size", "1");
+        buildingAdapter.setParameter("block-size", "1");
         buildingAdapter.setParameter("result-file", buildingFile);
         buildingAdapter.fetchBuildings();
 

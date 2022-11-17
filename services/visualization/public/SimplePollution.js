@@ -1,4 +1,9 @@
-import * as THREE from 'three'
+import { InstancedBufferAttribute } from 'three'
+import { BoxBufferGeometry } from 'three'
+import { RawShaderMaterial } from 'three'
+import { DoubleSide } from 'three'
+import { InstancedBufferGeometry } from 'three'
+import { Mesh } from 'three'
 
 import { scene, initScene } from "./Main.js";
 
@@ -40,9 +45,9 @@ class SimplePollution {
     static cubeColors;
 
     static _addCells(x_dim, y_dim, z_dim, colorArray) {
-        const boxGeo = new THREE.BoxBufferGeometry(1, 1, 1)
+        const boxGeo = new BoxBufferGeometry(1, 1, 1)
 
-        SimplePollution.cubeGeo = new THREE.InstancedBufferGeometry()
+        SimplePollution.cubeGeo = new InstancedBufferGeometry()
         SimplePollution.cubeGeo.index = boxGeo.index
         SimplePollution.cubeGeo.attributes.position = boxGeo.attributes.position
 
@@ -68,11 +73,11 @@ class SimplePollution {
             console.log("test")
         }
 
-        const offsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3);
-        const orientationAttribute = new THREE.InstancedBufferAttribute(new Float32Array(orientations), 4);
+        const offsetAttribute = new InstancedBufferAttribute(new Float32Array(offsets), 3);
+        const orientationAttribute = new InstancedBufferAttribute(new Float32Array(orientations), 4);
 
         SimplePollution.cubeColors = new Float32Array(colorArray)
-        const colorAttribute = new THREE.InstancedBufferAttribute(SimplePollution.cubeColors, 1);
+        const colorAttribute = new InstancedBufferAttribute(SimplePollution.cubeColors, 1);
 
         SimplePollution.cubeGeo.setAttribute('offset', offsetAttribute);
         SimplePollution.cubeGeo.setAttribute('orientation', orientationAttribute);
@@ -80,15 +85,15 @@ class SimplePollution {
         SimplePollution.cubeGeo.setAttribute('color', colorAttribute);
         SimplePollution.cubeGeo.getAttribute('color').needsUpdate = true;
 
-        const material = new THREE.RawShaderMaterial({
+        const material = new RawShaderMaterial({
             vertexShader: SimplePollution._VS,
             fragmentShader: SimplePollution._FS,
-            side: THREE.DoubleSide,
+            side: DoubleSide,
             transparent: true,
             depthWrite: false,
         });
 
-        const cubeMesh = new THREE.Mesh(SimplePollution.cubeGeo, material);
+        const cubeMesh = new Mesh(SimplePollution.cubeGeo, material);
 
         scene.add(cubeMesh);
     }
@@ -104,7 +109,7 @@ class SimplePollution {
             }
         }
 
-        const colorAttribute = new THREE.InstancedBufferAttribute(SimplePollution.cubeColors, 1);
+        const colorAttribute = new InstancedBufferAttribute(SimplePollution.cubeColors, 1);
 
         SimplePollution.cubeGeo.setAttribute('color', colorAttribute);
         SimplePollution.cubeGeo.getAttribute('color').needsUpdate = true;

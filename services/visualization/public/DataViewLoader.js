@@ -8,7 +8,7 @@ class DataViewLoader {
             const {value, done} = await reader.read();
 
             if (done) {
-                return new DataView(array.buffer);
+                break;
             }
 
             let newArray = new Uint8Array(array.byteLength + value.byteLength)
@@ -16,6 +16,7 @@ class DataViewLoader {
             newArray.set(value, array.byteLength);
             array = newArray
         }
+        return new DataView(array.buffer);
     }
 }
 
