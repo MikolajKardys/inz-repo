@@ -1,6 +1,12 @@
 package pl.agh.diffusion_project.adapters;
 
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class VisualizationAdapter extends AbstractAdapter{
     private final String vizPath;
 
@@ -16,6 +22,35 @@ public class VisualizationAdapter extends AbstractAdapter{
 
     public String getBuildingDataPath () {
         return this.vizPath + this.dataPath + "/obstacles.dat";
+    }
+
+    public String getPollutionDataPath (int iteration) {
+        return this.vizPath + this.dataPath + String.format("/iterations/results%d.dat", iteration);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void generateConfig (int iterationsNum) {
+        String configPath = this.vizPath + this.dataPath + "/sim-config.json";
+
+        JSONObject mainJson = new JSONObject();
+        mainJson.put("buildings-file", "./data/obstacles.dat");
+
+        JSONObject pollutionData = new JSONObject();
+        pollutionData.put("iteration-number", iterationsNum);
+        JSONArray iterations = new JSONArray();
+        for (int i = 0; i < iterationsNum; i++)
+            iterations.add(String.format("./data/iterations/results%d.dat", i));
+        pollutionData.put("pollution-files", iterations);
+
+        mainJson.put("pollution-data", pollutionData);
+
+        try {
+            FileWriter file = new FileWriter(configPath);
+            file.write(mainJson.toJSONString());
+            file.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void runVisualization() throws Exception {
