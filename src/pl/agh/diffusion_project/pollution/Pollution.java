@@ -188,7 +188,7 @@ public class Pollution {
         for (Pair<Integer, Integer> pair: mapping) {
             int left = pair.getValue0();
             int right = pair.getValue1();
-            values.set(right, values.get(right) + pollutionValues.get(left) * coefficients.get(left));
+            values.set(right, values.get(right) + pollutionValues.get(left) * coefficients.get(right));
         }
     }
 
@@ -196,21 +196,17 @@ public class Pollution {
      * Modifies pollution values with coefficient for each value and does opposite to parameter rest pollution.
      *
      * @param pollution     pollution increased by
-     * @param restPollution pollution increased by
      * @param mapping       mapping of the parameter cell pollution to target cell pollution
      * @param coefficients  coefficients of the parameter pollution
      * @param coefficient   coefficient for modification
      */
-    public void mod(Pollution pollution, Pollution restPollution, List<Pair<Integer, Integer>> mapping, List<Float> coefficients, Float coefficient) {
+    public void mod(Pollution pollution, List<Pair<Integer, Integer>> mapping, List<Float> coefficients, Float coefficient) {
         List<Float> pollutionValues = pollution.getFastAll();
-        List<Float> restPollutionValues = restPollution.getFastAll();
         for (Pair<Integer, Integer> pair: mapping) {
             int left = pair.getValue0();
             int right = pair.getValue1();
             float value = pollutionValues.get(left) * coefficient;
             values.set(right, values.get(right) + value * coefficients.get(left));
-//            restPollutionValues.set(right, restPollutionValues.get(right) + value * coefficients.get(left));
-            //ŻLE, wielowątkowość
         }
     }
 

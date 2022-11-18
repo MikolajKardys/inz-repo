@@ -95,7 +95,12 @@ public class RefactoredCell {
      * @param coefficient  coefficient for modification
      */
     public void modPollution(RefactoredCell cell, List<Float> coefficients, Float coefficient) {
-        this.newPollution.mod(cell.currentPollution, cell.newPollution, mapping.getMappingMatrix(cell.cellType, this.cellType), coefficients, coefficient);
+        this.newPollution.mod(cell.currentPollution, mapping.getMappingMatrix(cell.cellType, this.cellType), coefficients, coefficient);
+//        System.out.println(newPollution);
+    }
+
+    public Integer getCellType() {
+        return cellType;
     }
 
     @Override
