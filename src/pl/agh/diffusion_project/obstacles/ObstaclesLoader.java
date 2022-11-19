@@ -87,4 +87,8 @@ public class ObstaclesLoader {
             e.printStackTrace();
         }
     }
+
+    public Boolean isBuilding(int x, int y, int z) {
+        return heightMatrix[x][y] > z;
+    }
 }

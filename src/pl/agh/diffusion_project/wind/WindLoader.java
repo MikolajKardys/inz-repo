@@ -5,10 +5,27 @@ import java.io.IOException;
 import java.util.Scanner;
 import org.javatuples.Triplet;
 public class WindLoader {
+    private final int dx, dy, dz;
     private final Triplet<Float, Float, Float> [][][] windField;
 
     private WindLoader(int dx, int dy, int dz){
+        this.dx=dx;
+        this.dy=dy;
+        this.dz=dz;
         this.windField = new Triplet[dx][dy][dz];
+    }
+
+    public int getDx() {
+        return dx;
+    }
+    public int getDy() {
+        return dy;
+    }
+    public int getDz() {
+        return dz;
+    }
+    public Triplet<Float, Float, Float> getVector(int i, int j, int k) {
+        return windField[i][j][k];
     }
 
     public static WindLoader loadWindFromFile(String fileName) throws IOException {
@@ -39,6 +56,6 @@ public class WindLoader {
             }
         }
 
-        return new WindLoader(dx, dy, dz);
+        return windLoader;
     }
 }
