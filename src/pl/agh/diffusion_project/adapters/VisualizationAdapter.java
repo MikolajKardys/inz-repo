@@ -4,8 +4,10 @@ package pl.agh.diffusion_project.adapters;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Objects;
 
 public class VisualizationAdapter extends AbstractAdapter{
     private final String vizPath;
@@ -30,6 +32,14 @@ public class VisualizationAdapter extends AbstractAdapter{
 
     public void generateConfig (int iterationsNum) {
         this.generateConfig(iterationsNum, true);
+    }
+
+    public void clearIterations () {
+        File dir = new File(this.vizPath + this.dataPath + "/iterations");
+        for(File file: Objects.requireNonNull(dir.listFiles()))
+            if (!file.isDirectory()) {
+                Object ignore = file.delete();
+            }
     }
 
     @SuppressWarnings("unchecked")

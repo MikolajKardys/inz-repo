@@ -107,12 +107,8 @@ class SimpleObstacles {
         cubeGeo.setAttribute('color', colorAttribute);
 
         const material = new ShaderMaterial({
-            uniforms: {
-                lightDirection: { value: new Vector3(1.0, 1.0, 1.0).normalize() }
-            },
             vertexShader: SimpleObstacles._VS,
             fragmentShader: SimpleObstacles._FS,
-
             depthTest: true
         });
 

@@ -57,15 +57,6 @@ currentFrame.addEventListener('change', (_) => {
             animate()
         })
     }
-
-    if (simConfigLoader.buildingsFile !== ""){
-        DataViewLoader.loadDataFrameFromDatFile(simConfigLoader.buildingsFile).then((dataView) => {
-            SimpleObstacles.loadObstaclesFromDataView(dataView)
-
-            render()
-            animate()
-        });
-    }
 });
 
 document.getElementById('next-frame-button').onclick = function () {
@@ -78,6 +69,14 @@ document.getElementById('previous-frame-button').onclick = function () {
     currentFrame.dispatchEvent(new Event('change'));
 }
 
+if (simConfigLoader.buildingsFile !== ""){
+    DataViewLoader.loadDataFrameFromDatFile(simConfigLoader.buildingsFile).then((dataView) => {
+        SimpleObstacles.loadObstaclesFromDataView(dataView)
+
+        render()
+        animate()
+    });
+}
 
 currentFrame.dispatchEvent(new Event('change'));
 

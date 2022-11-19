@@ -48,13 +48,10 @@ class SimplePollution {
 
     static _addCells(x_dim, y_dim, z_dim, colorArray) {
         const extra = new THREE.BoxGeometry(x_dim, y_dim, z_dim)
-
-        var geo = new THREE.EdgesGeometry( extra ); // or WireframeGeometry( geometry )
-
-        var mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 2 } );
-
-        var wireframe = new THREE.LineSegments( geo, mat );
-
+        let geo = new THREE.EdgesGeometry( extra ); // or WireframeGeometry( geometry )
+        let mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 2 } );
+        let wireframe = new THREE.LineSegments( geo, mat );
+        wireframe.position.set(-0.5, -0.5, -0.5)
         scene.add( wireframe );
 
         const boxGeo = new BoxBufferGeometry(1, 1, 1)
