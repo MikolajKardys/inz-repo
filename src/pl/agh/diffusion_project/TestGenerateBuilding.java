@@ -1,20 +1,106 @@
 package pl.agh.diffusion_project;
 
 import org.javatuples.Triplet;
+import pl.agh.diffusion_project.adapters.VisualizationAdapter;
+import pl.agh.diffusion_project.adapters.WindAdapter;
 import pl.agh.diffusion_project.obstacles.ObstaclesLoader;
+import pl.agh.diffusion_project.pollution.Pollution;
 import pl.agh.diffusion_project.wind.Wind;
 import pl.agh.diffusion_project.wind.WindLoader;
 
-public class TestGenerateBuilding {
-    public static void main(String[] args) throws Exception {
-        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("testowy.bmp");
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Properties;
 
-        WindLoader windLoader = WindLoader.loadWindFromFile("testowy-v8-d0-100-velocity");
+public class TestGenerateBuilding {
+    private static void saveConcentration(float [][][] p, String fileName) {
+
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName, false))) {
+            int x = p.length;
+            int y = p[0].length;
+            int z = p[0][0].length;
+
+            out.writeInt(x);
+            out.writeInt(y);
+            out.writeInt(z);
+
+            for (int i = 0; i < x; i++) {
+                for (int j = 0; j < y; j++) {
+                    for (int k = 0; k < z; k++) {
+                        out.writeFloat(p[i][j][k]);
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void printNonZero(float [][][] p) {
+        int x = p.length;
+        int y = p[0].length;
+        int z = p[0][0].length;
+
+        for (int i = 0; i < x; i++){
+            for (int j = 0; j < y; j++){
+                for (int k = 0; k < z; k++){
+                    if (p[i][j][k] > 0){
+                        System.out.println(i + " " + j + " " + k + " " + p[i][j][k]);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        Properties prop = new Properties();
+        prop.load(new FileInputStream("resources/config.properties"));
+
+        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("empty.bmp");
+        VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
+
+        WindLoader windLoader = WindLoader.loadWindFromFile("empty-v8-d0-1000-velocity");
         Wind wind = new Wind(windLoader, obstacleLoader);
 
-        wind.updateWind(new Float[0][0][0]);
+        float [][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
 
+        oldTab[5][5][5] = 1.0f;
+
+        saveConcentration(oldTab, vizAdapter.getPollutionDataPath(0));
+        printNonZero(oldTab);
+        for (int i = 0; i < 20; i++){
+            wind.updateWind(oldTab);
+            System.out.println(i);
+            printNonZero(oldTab);
+            saveConcentration(oldTab, vizAdapter.getPollutionDataPath(i + 1));
+        }
+
+
+        vizAdapter.generateConfig(21, false);
         /*
+        Properties prop = new Properties();
+        prop.load(new FileInputStream("resources/config.properties"));
+
+        WindAdapter windAdapter = new WindAdapter(prop.getProperty("wind_calculator_path"));
+        windAdapter.setParameter("m", "empty.bmp");
+        windAdapter.setParameter("z", "20");
+        windAdapter.setParameter("s", "empty-result");
+
+        windAdapter.calculateWind();
+
+
+        bstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("empty.bmp");
+
+        WindLoader windLoader = WindLoader.loadWindFromFile("empty-v8-d0-100-velocity");
+        Wind wind = new Wind(windLoader, obstacleLoader);
+
+        float [][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];O
+
+
         final String buildingFile = "result-1234.bmp";
 
         Properties prop = new Properties();

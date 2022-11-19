@@ -1,6 +1,5 @@
-sys
 jax
 numpy
 tqdm
 argparse
-PIL
+Pillow

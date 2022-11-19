@@ -28,12 +28,19 @@ public class VisualizationAdapter extends AbstractAdapter{
         return this.vizPath + this.dataPath + String.format("/iterations/results%d.dat", iteration);
     }
 
-    @SuppressWarnings("unchecked")
     public void generateConfig (int iterationsNum) {
+        this.generateConfig(iterationsNum, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void generateConfig (int iterationsNum, boolean readBuildings) {
         String configPath = this.vizPath + this.dataPath + "/sim-config.json";
 
         JSONObject mainJson = new JSONObject();
-        mainJson.put("buildings-file", "./data/obstacles.dat");
+        if (readBuildings)
+            mainJson.put("buildings-file", "./data/obstacles.dat");
+        else
+            mainJson.put("buildings-file", "");
 
         JSONObject pollutionData = new JSONObject();
         pollutionData.put("iteration-number", iterationsNum);

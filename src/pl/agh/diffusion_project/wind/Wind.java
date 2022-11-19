@@ -9,16 +9,16 @@ import java.util.ArrayList;
 public class Wind {
     private final int dx, dy, dz;
     private final ArrayList<Quartet<Byte, Byte, Byte, Float>>[][][] windCoef;
-    private final Float [][][] windSpeed;
-    private final Float [][][] incrementor;
-    private Float MAX_WIND_SPEED = 0F;
+    private final float [][][] windSpeed;
+    private final float [][][] incrementor;
+    private float MAX_WIND_SPEED = 0F;
     public Wind(WindLoader windLoader, ObstaclesLoader obstaclesLoader) {
         this.dx = windLoader.getDx();
         this.dy = windLoader.getDy();
         this.dz = windLoader.getDz();
         this.windCoef = new ArrayList[dx][dy][dz];
-        this.incrementor = new Float[dx][dy][dz];
-        this.windSpeed = new Float[dx][dy][dz];
+        this.incrementor = new float[dx][dy][dz];
+        this.windSpeed = new float[dx][dy][dz];
 
         float speed;
         for(int i=0; i<dx; i++) {
@@ -170,10 +170,11 @@ public class Wind {
             i = q.getValue0();
             j = q.getValue1();
             k = q.getValue2();
-            if (windSpeed[i][j][k] >= 0) {
-                result.add(new Quartet<>(i, j, k, q.getValue3()));
-                sum += q.getValue3();
-            }
+            if(myi+i >= 0 && myj+j >= 0 && myk+k >= 0 && myi+i < dx && myj+j < dy && myk+k < dz)
+                if (windSpeed[myi + i][myj + j][myk + k] >= 0) {
+                    result.add(new Quartet<>(i, j, k, q.getValue3()));
+                    sum += q.getValue3();
+                }
         }
         ArrayList<Quartet<Byte, Byte, Byte, Float>> result2 = new ArrayList<>();
         for(Quartet<Byte, Byte, Byte, Float> q : xyz) {
@@ -191,10 +192,10 @@ public class Wind {
         return (float)Math.atan2(y, x);
     }
 
-    public void updateWind(Float[][][] oldPollutions) {
-        Float[][][] newPollutions = new Float[dx][dy][dz];
+    public void updateWind(float[][][] oldPollutions) {
+        float[][][] newPollutions = new float[dx][dy][dz];
 
-        for(int m=0; m<MAX_WIND_SPEED; m++) {
+        //for(int m=0; m<MAX_WIND_SPEED; m++) {
             for (int i = 0; i < dx; i++) {
                 for (int j = 0; j < dy; j++) {
                     for (int k = 0; k < dz; k++) {
@@ -209,20 +210,22 @@ public class Wind {
                     }
                 }
             }
-        }
+        //}
     }
 
-    private void updateMicroWind(Float[][][] oldPollutions, Float[][][] newPollutions, int i, int j, int k) {
+    private void updateMicroWind(float[][][] oldPollutions, float[][][] newPollutions, int i, int j, int k) {
         incrementor[i][j][k] += windSpeed[i][j][k];
         if(incrementor[i][j][k] >= MAX_WIND_SPEED) {
-            for(Quartet<Byte, Byte, Byte, Float> q : windCoef[i][j][k])
-                newPollutions[i+q.getValue0()][j+q.getValue1()][k+q.getValue2()] = q.getValue3()*oldPollutions[i][j][k];
+            System.out.println(windCoef[i][j][k]);
+            for(Quartet<Byte, Byte, Byte, Float> q : windCoef[i][j][k]) {
+                newPollutions[i + q.getValue0()][j + q.getValue1()][k + q.getValue2()] += q.getValue3() * oldPollutions[i][j][k];
+            }
             if(windCoef[i][j][k].size() > 0)
                 oldPollutions[i][j][k] = 0F;
         }
     }
 
-    private void u(Float[][][] oldPollutions, Float[][][] newPollutions, int i, int j, int k) {
+    private void u(float[][][] oldPollutions, float[][][] newPollutions, int i, int j, int k) {
         if(incrementor[i][j][k] >= MAX_WIND_SPEED) {
             oldPollutions[i][j][k] += newPollutions[i][j][k];
             newPollutions[i][j][k] = 0F;

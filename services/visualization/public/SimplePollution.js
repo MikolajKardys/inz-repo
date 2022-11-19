@@ -5,6 +5,8 @@ import { DoubleSide } from 'three'
 import { InstancedBufferGeometry } from 'three'
 import { Mesh } from 'three'
 
+import * as THREE from 'three'
+
 import { scene, initScene } from "./Main.js";
 
 class SimplePollution {
@@ -45,6 +47,16 @@ class SimplePollution {
     static cubeColors;
 
     static _addCells(x_dim, y_dim, z_dim, colorArray) {
+        const extra = new THREE.BoxGeometry(x_dim, y_dim, z_dim)
+
+        var geo = new THREE.EdgesGeometry( extra ); // or WireframeGeometry( geometry )
+
+        var mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 2 } );
+
+        var wireframe = new THREE.LineSegments( geo, mat );
+
+        scene.add( wireframe );
+
         const boxGeo = new BoxBufferGeometry(1, 1, 1)
 
         SimplePollution.cubeGeo = new InstancedBufferGeometry()
@@ -59,7 +71,7 @@ class SimplePollution {
         const z_offset = z_dim / 2;
 
         for (let i = 0; i < x_dim; i++) {
-            for (let j = 0; j < 100; j++) {
+            for (let j = 0; j < y_dim; j++) {
                 for (let k = 0; k < z_dim; k++) {
                     const x = i - x_offset;
                     const y = j - y_offset;
@@ -70,7 +82,6 @@ class SimplePollution {
                     orientations.push(0, 0, 0, 0);
                 }
             }
-            console.log("test")
         }
 
         const offsetAttribute = new InstancedBufferAttribute(new Float32Array(offsets), 3);
@@ -116,9 +127,9 @@ class SimplePollution {
     }
 
     static loadPollutionFromDataView(dataView){
-        const x_dim = 100
-        const y_dim = 100
-        const z_dim = 100
+        const x_dim = dataView.getInt32(0)
+        const y_dim = dataView.getInt32(4)
+        const z_dim = dataView.getInt32(8)
 
         if (scene == null){
             initScene(x_dim, y_dim, z_dim)
@@ -126,7 +137,7 @@ class SimplePollution {
 
         const array = []
         for (let i = 0; i < x_dim * y_dim * z_dim; i++) {
-            array.push(dataView.getFloat32(12 + i * 4, false))
+            array.push(dataView.getFloat32(12 + i * 4))
         }
 
         if (SimplePollution.cubeGeo == null) {

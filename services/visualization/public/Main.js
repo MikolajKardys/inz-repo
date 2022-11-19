@@ -7,6 +7,7 @@ import { OrbitControls } from 'orbit-controls'
 import { SimConfigLoader } from "./SimConfigLoader.js";
 import { DataViewLoader } from "./DataViewLoader.js";
 import { SimpleObstacles } from "./SimpleObstacles.js";
+import {SimplePollution} from "./SimplePollution.js";
 
 let scene
 let camera
@@ -48,22 +49,23 @@ currentFrame.addEventListener('change', (_) => {
     currentFrame.value = currentValue;
 
     if (parseInt(currentValue) > 0){
-        const pollutionFile = simConfigLoader.pollutionJsonData['pollution-files'][parseInt(currentValue)]
+        const pollutionFile = simConfigLoader.pollutionJsonData['pollution-files'][parseInt(currentValue) - 1]
         DataViewLoader.loadDataFrameFromDatFile(pollutionFile).then((dataView) => {
-            console.log(dataView);
-            SimpleObstacles.loadObstaclesFromDataView(dataView);
+            SimplePollution.loadPollutionFromDataView(dataView);
 
             render()
             animate()
         })
     }
-});
 
-DataViewLoader.loadDataFrameFromDatFile(simConfigLoader.buildingsFile).then((dataView) => {
-    SimpleObstacles.loadObstaclesFromDataView(dataView)
+    if (simConfigLoader.buildingsFile !== ""){
+        DataViewLoader.loadDataFrameFromDatFile(simConfigLoader.buildingsFile).then((dataView) => {
+            SimpleObstacles.loadObstaclesFromDataView(dataView)
 
-    render()
-    animate()
+            render()
+            animate()
+        });
+    }
 });
 
 document.getElementById('next-frame-button').onclick = function () {
