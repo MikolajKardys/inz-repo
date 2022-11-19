@@ -1,19 +1,9 @@
 package pl.agh.diffusion_project;
 
-import org.javatuples.Triplet;
-import pl.agh.diffusion_project.adapters.VisualizationAdapter;
-import pl.agh.diffusion_project.adapters.WindAdapter;
-import pl.agh.diffusion_project.obstacles.ObstaclesLoader;
-import pl.agh.diffusion_project.pollution.Pollution;
-import pl.agh.diffusion_project.wind.Wind;
-import pl.agh.diffusion_project.wind.WindLoader;
 
 import java.io.DataOutputStream;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Properties;
 
 public class TestGenerateBuilding {
     private static void saveConcentration(float [][][] p, String fileName) {
@@ -57,6 +47,7 @@ public class TestGenerateBuilding {
     }
 
     public static void main(String[] args) throws Exception {
+        /*
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
 
@@ -64,6 +55,7 @@ public class TestGenerateBuilding {
         VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
 
         WindLoader windLoader = WindLoader.loadWindFromFile("empty-v8-d0-1000-velocity");
+
         Wind wind = new Wind(windLoader, obstacleLoader);
 
         float [][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
@@ -81,7 +73,14 @@ public class TestGenerateBuilding {
 
 
         vizAdapter.generateConfig(21, false);
-        /*
+
+        printNonZero(oldTab);
+        for (int i = 0; i < 10; i++){
+            wind.updateWind(oldTab);
+            printNonZero(oldTab);
+        }
+
+
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
 

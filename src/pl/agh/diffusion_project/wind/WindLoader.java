@@ -49,7 +49,11 @@ public class WindLoader {
                         for(int k=0; k<dz; k++) {
                             int index = i*dx + j*dy + k;
                             String[] parts = vectors[index].split(";");
-                            windLoader.windField[i][j][k] = new Triplet<>(Float.parseFloat(parts[0]), Float.parseFloat(parts[1]), Float.parseFloat(parts[2]));
+
+                            float x = Math.round(1000*Float.parseFloat(parts[0]))/1000F;
+                            float y = Math.round(1000*Float.parseFloat(parts[1]))/1000F;
+                            float z = Math.round(1000*Float.parseFloat(parts[2]))/1000F;
+                            windLoader.windField[i][j][k] = new Triplet<>(x, y, z);
                         }
                     }
                 }
