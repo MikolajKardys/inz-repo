@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Wind {
     private final int dx, dy, dz;
-    private final ArrayList<Quartet<Byte, Byte, Byte, Float>>[][][] neighborsFactors;
+    private final ArrayList<Quartet<Short, Short, Short, Float>>[][][] neighborsFactors;
     private final float [][][] windSpeed;
     private final float [][][] incrementor;
     private float MAX_WIND_SPEED = 0F;
@@ -44,16 +44,17 @@ public class Wind {
                         MAX_WIND_SPEED = speed;
 
                     neighborsFactors[i][j][k] = getNeighborsFactors(i, j, k, vector);
-                    /*if(i == 0 && j == 1 && k == 0) {
+                    /*if(i == 0 && j == 18 && k == 0) {
                         System.out.println(vector);
                         System.out.println(getNeighborsFactors(i, j, k, vector));
+                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
                     }*/
                 }
             }
         }
     }
 
-    private ArrayList<Quartet<Byte, Byte, Byte, Float>> getNeighborsFactors(
+    private ArrayList<Quartet<Short, Short, Short, Float>> getNeighborsFactors(
             int i, int j, int k,Triplet<Float, Float, Float> vector) {
 
         float x = vector.getValue0();
@@ -207,44 +208,56 @@ public class Wind {
             xyzFactors.add(new Quartet<>(0, 0, -1, 1F));
         }
 
-        byte iNeiB, jNeiB, kNeiB;
-        ArrayList<Quartet<Byte, Byte, Byte, Float>> xyzFactorsWithoutBuildings = new ArrayList<>();
-
-
-
+        int iNeiInc, jNeiInc, kNeiInc;
+        short iNeiS, jNeiS, kNeiS;
+        ArrayList<Quartet<Short, Short, Short, Float>> xyzFactorsWithoutBuildings = new ArrayList<>();
         float sum = 0F;
 
         for(Quartet<Integer, Integer, Integer, Float> quartet : xyzFactors) {
-            iNeiB = (byte)(int)quartet.getValue0();
-            jNeiB = (byte)(int)quartet.getValue1();
-            kNeiB = (byte)(int)quartet.getValue2();
-            if(neighbourExists(i, j, k, iNeiB, jNeiB, kNeiB))
-                if (windSpeed[i + iNeiB][j + jNeiB][k + kNeiB] >= 0) {
-                    xyzFactorsWithoutBuildings.add(new Quartet<>(iNeiB, jNeiB, kNeiB, quartet.getValue3()));
-                    sum += quartet.getValue3();
-                }
-        }
-        
-        ArrayList<Quartet<Byte, Byte, Byte, Float>> xyzFactorsWithoutOutsideNeighbours = new ArrayList<>();
-        for(Quartet<Byte, Byte, Byte, Float> quartet : xyzFactorsWithoutBuildings) {
-            iNeiB = quartet.getValue0();
-            jNeiB = quartet.getValue1();
-            kNeiB = quartet.getValue2();
-            if(neighbourExists(i, j, k, iNeiB, jNeiB, kNeiB))
-                xyzFactorsWithoutOutsideNeighbours.add(new Quartet<>(iNeiB, jNeiB, kNeiB, quartet.getValue3()/sum));
+            iNeiInc = quartet.getValue0();
+            jNeiInc = quartet.getValue1();
+            kNeiInc = quartet.getValue2();
+            if((neighbourExists(i, j, k, iNeiInc, jNeiInc, kNeiInc) &&
+                    windSpeed[i+iNeiInc][j+jNeiInc][k+kNeiInc] >= 0) ||
+                    ((i+iNeiInc < 0 || i+iNeiInc >= dx || j+jNeiInc < 0 || j+jNeiInc >= dy || k+kNeiInc >= dz) && k+kNeiInc >= 0)) {
+                xyzFactorsWithoutBuildings.add(
+                        new Quartet<>((short) iNeiInc, (short) jNeiInc, (short) kNeiInc, quartet.getValue3()));
+                sum += quartet.getValue3();
+            }
         }
 
-        return xyzFactorsWithoutOutsideNeighbours;
+        ArrayList<Quartet<Short, Short, Short, Float>> xyzFactorsWithIndexes = new ArrayList<>();
+        for(Quartet<Short, Short, Short, Float> quartet : xyzFactorsWithoutBuildings) {
+            iNeiInc = quartet.getValue0();
+            jNeiInc = quartet.getValue1();
+            kNeiInc = quartet.getValue2();
+            iNeiS = (short)(i+iNeiInc);
+            jNeiS = (short)(j+jNeiInc);
+            kNeiS = (short)(k+kNeiInc);
+            if(iNeiS < 0)
+                iNeiS = (short)(dx+1);
+            if(jNeiS < 0)
+                jNeiS = (short)(dy+1);
+
+            xyzFactorsWithIndexes.add(new Quartet<>(iNeiS, jNeiS, kNeiS, quartet.getValue3()/sum));
+        }
+
+        /*float toOne = 0F;
+        for(Quartet<Short, Short, Short, Float> quartet : xyzFactorsWithIndexes) {
+            toOne += quartet.getValue3();
+        }
+        if(Math.abs(toOne - 1F) > 0.00000001F) {
+            System.out.println(i + " " + j + " " + k + " " + toOne);
+        }*/
+
+        return xyzFactorsWithIndexes;
     }
 
     private float getAngle(float x, float y) {
         return (float)Math.atan2(y, x);
     }
 
-    public void updateWind(float[][][] oldPollutions) {
-        float[][][] newPollutions = new float[dx][dy][dz];
-
-        //for(int m=0; m<MAX_WIND_SPEED; m++) {
+    public void updateWind(float[][][] oldPollutions, float[][][] newPollutions) {
         for (int i = 0; i < dx; i++) {
             for (int j = 0; j < dy; j++) {
                 for (int k = 0; k < dz; k++) {
@@ -259,21 +272,22 @@ public class Wind {
                 }
             }
         }
-        //}
     }
 
-    private void distributeMicroWind(float[][][] oldPollutions, float[][][] newPollutions, int i, int j, int k) {
+    private void distributeMicroWind(float[][][] oldPollutions, float[][][] newPollutions,
+                                     int i, int j, int k) {
         incrementor[i][j][k] += windSpeed[i][j][k];
         if(incrementor[i][j][k] >= MAX_WIND_SPEED) {
-            for(Quartet<Byte, Byte, Byte, Float> q : neighborsFactors[i][j][k]) {
-                newPollutions[i + q.getValue0()][j + q.getValue1()][k + q.getValue2()] += q.getValue3() * oldPollutions[i][j][k];
+            for(Quartet<Short, Short, Short, Float> q : neighborsFactors[i][j][k]) {
+                newPollutions[q.getValue0()][q.getValue1()][q.getValue2()] += q.getValue3() * oldPollutions[i][j][k];
             }
             if(neighborsFactors[i][j][k].size() > 0)
                 oldPollutions[i][j][k] = 0F;
         }
     }
 
-    private void updateMicroWind(float[][][] oldPollutions, float[][][] newPollutions, int i, int j, int k) {
+    private void updateMicroWind(float[][][] oldPollutions, float[][][] newPollutions,
+                                 int i, int j, int k) {
         if(incrementor[i][j][k] >= MAX_WIND_SPEED) {
             oldPollutions[i][j][k] += newPollutions[i][j][k];
             newPollutions[i][j][k] = 0F;

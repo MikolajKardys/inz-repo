@@ -52,6 +52,21 @@ public class TestGenerateBuilding {
         }
     }
 
+    private static void printSum(float [][][] p) {
+        int x = p.length;
+        int y = p[0].length;
+        int z = p[0][0].length;
+        float sum = 0F;
+        for (int i = 0; i < x; i++){
+            for (int j = 0; j < y; j++){
+                for (int k = 0; k < z; k++){
+                    sum+=p[i][j][k];
+                }
+            }
+        }
+        System.out.println(sum);
+    }
+
     public static void main(String[] args) throws Exception {
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
@@ -62,18 +77,17 @@ public class TestGenerateBuilding {
 
         Wind wind = new Wind(windLoader, obstacleLoader);
 
-        float [][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
+        float[][][] newPollutions = new float[windLoader.getDx()+2][windLoader.getDy()+2][windLoader.getDz()+1];
+        float[][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
 
         oldTab[0][0][0] = 1.0f;
 
-        int iterNumber = 100;
-        System.out.println(0);
-        printNonZero(oldTab);
-        for (int i = 0; i < 10; i++){
-            wind.updateWind(oldTab);
+        int iterNumber = 25;
+        //System.out.println(0);
+        //printNonZero(oldTab);
+        for (int i = 0; i < iterNumber; i++){
+            wind.updateWind(oldTab, newPollutions);
             //saveConcentration(oldTab, vizAdapter.getPollutionDataPath(i + 1));
-            System.out.println(i + 1);
-            printNonZero(oldTab);
         }
 
         /*
