@@ -57,9 +57,6 @@ public class TestGenerateBuilding {
         prop.load(new FileInputStream("resources/config.properties"));
 
         ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("testowy.bmp", 50);
-        VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
-
-        vizAdapter.clearIterations();
 
         WindLoader windLoader = WindLoader.loadWindFromFile("testowy-v8-d0-1000-velocity");
 
@@ -70,18 +67,14 @@ public class TestGenerateBuilding {
         oldTab[0][0][0] = 1.0f;
 
         int iterNumber = 100;
-
-        saveConcentration(oldTab, vizAdapter.getPollutionDataPath(0));
         System.out.println(0);
-        for (int i = 0; i < iterNumber; i++){
+        printNonZero(oldTab);
+        for (int i = 0; i < 10; i++){
             wind.updateWind(oldTab);
             //saveConcentration(oldTab, vizAdapter.getPollutionDataPath(i + 1));
             System.out.println(i + 1);
+            printNonZero(oldTab);
         }
-        saveConcentration(oldTab, vizAdapter.getPollutionDataPath(1));
-
-        vizAdapter.generateConfig(2);
-        obstacleLoader.saveInDataFile(vizAdapter.getBuildingDataPath());
 
         /*
         Properties prop = new Properties();

@@ -18,6 +18,8 @@ public class Wind {
     static private final float PI3_DIV_4 = (float)(3*Math.PI/4);
     static private final float PI_DIV_4 = (float)Math.PI/4;
 
+    private final boolean PRINT_SECTOR = false;
+
     public Wind(WindLoader windLoader, ObstaclesLoader obstaclesLoader) {
         this.dx = windLoader.getDx();
         this.dy = windLoader.getDy();
@@ -42,6 +44,10 @@ public class Wind {
                         MAX_WIND_SPEED = speed;
 
                     neighborsFactors[i][j][k] = getNeighborsFactors(i, j, k, vector);
+                    /*if(i == 0 && j == 1 && k == 0) {
+                        System.out.println(vector);
+                        System.out.println(getNeighborsFactors(i, j, k, vector));
+                    }*/
                 }
             }
         }
@@ -58,103 +64,156 @@ public class Wind {
         ArrayList<Triplet<Integer, Integer, Float>> xyFactors = new ArrayList<>();
 
         if(theta == 0F) {
+            if(PRINT_SECTOR)
+                System.out.println("I");
             xyFactors.add(new Triplet<>(1, 0, 1F));
         } else if(theta > 0F && theta < PI_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("I/II");
             float factor = theta/PI_DIV_4;
-            xyFactors.add(new Triplet<>(1, 0, factor));
-            xyFactors.add(new Triplet<>(1, 1, 1F - factor));
+            xyFactors.add(new Triplet<>(1, 0, 1F - factor));
+            xyFactors.add(new Triplet<>(1, 1, factor));
         } else if(theta == PI_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("II");
             xyFactors.add(new Triplet<>(1, 1, 1F));
         } else if(theta > PI_DIV_4 && theta < PI_DIV_2) {
+            if(PRINT_SECTOR)
+                System.out.println("II/III");
             float factor = (theta-PI_DIV_4)/PI_DIV_4;
-            xyFactors.add(new Triplet<>(1, 1, factor));
-            xyFactors.add(new Triplet<>(0, 1, 1F - factor));
+            xyFactors.add(new Triplet<>(1, 1, 1F- factor));
+            xyFactors.add(new Triplet<>(0, 1, factor));
         } else if(theta == PI_DIV_2) {
+            if(PRINT_SECTOR)
+                System.out.println("III");
             xyFactors.add(new Triplet<>(0, 1, 1F));
         } else if(theta > PI_DIV_2 && theta < PI3_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("III/IV");
             float factor = (theta-PI_DIV_2)/PI_DIV_4;
-            xyFactors.add(new Triplet<>(0, 1, factor));
-            xyFactors.add(new Triplet<>(-1, 1, 1F - factor));
+            xyFactors.add(new Triplet<>(0, 1, 1F - factor));
+            xyFactors.add(new Triplet<>(-1, 1, factor));
         } else if(theta == PI3_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("IV");
             xyFactors.add(new Triplet<>(-1, 1, 1F));
         } else if(theta > PI3_DIV_4 && theta < PI) {
+            if(PRINT_SECTOR)
+                System.out.println("IV/V");
             float factor = (theta-PI3_DIV_4)/PI_DIV_4;
-            xyFactors.add(new Triplet<>(-1, 1, factor));
-            xyFactors.add(new Triplet<>(-1, 0, 1F - factor));
+            xyFactors.add(new Triplet<>(-1, 1, 1F - factor));
+            xyFactors.add(new Triplet<>(-1, 0, factor));
         } else if(theta == PI) {
+            if(PRINT_SECTOR)
+                System.out.println("V");
             xyFactors.add(new Triplet<>(-1, 0, 1F));
         } else if(theta < 0 && theta > -PI_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("I/VIII");
             float factor = -theta/PI_DIV_4;
-            xyFactors.add(new Triplet<>(1, 0, factor));
-            xyFactors.add(new Triplet<>(1, -1, 1F - factor));
+            xyFactors.add(new Triplet<>(1, 0, 1F - factor));
+            xyFactors.add(new Triplet<>(1, -1, factor));
         } else if(theta == -PI_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("VIII");
             xyFactors.add(new Triplet<>(1, -1, 1F));
         } else if(theta < -PI_DIV_4 && theta > -PI_DIV_2) {
+            if(PRINT_SECTOR)
+                System.out.println("VII/VIII");
             float factor = (-theta-PI_DIV_4)/PI_DIV_4;
-            xyFactors.add(new Triplet<>(1, -1, factor));
-            xyFactors.add(new Triplet<>(0, -1, 1F - factor));
+            xyFactors.add(new Triplet<>(1, -1, 1F - factor));
+            xyFactors.add(new Triplet<>(0, -1, factor));
         } else if(theta == -PI_DIV_2) {
+            if(PRINT_SECTOR)
+                System.out.println("VII");
             xyFactors.add(new Triplet<>(0, -1, 1F));
         } else if(theta < -PI_DIV_2 && theta > -PI3_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("VI/VII");
             float factor = (-theta-PI_DIV_2)/PI_DIV_4;
-            xyFactors.add(new Triplet<>(0, -1, factor));
-            xyFactors.add(new Triplet<>(-1, -1, 1F - factor));
+            xyFactors.add(new Triplet<>(0, -1, 1F - factor));
+            xyFactors.add(new Triplet<>(-1, -1, factor));
         } else if(theta == -PI3_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("VI");
             xyFactors.add(new Triplet<>(-1, -1, 1F));
         } else if(theta < -PI3_DIV_4 && theta > -PI) {
+            if(PRINT_SECTOR)
+                System.out.println("V/VI");
             float factor = (-theta-PI3_DIV_4)/PI_DIV_4;
-            xyFactors.add(new Triplet<>(-1, -1, factor));
-            xyFactors.add(new Triplet<>(-1, 0, 1F - factor));
+            xyFactors.add(new Triplet<>(-1, -1, 1F - factor));
+            xyFactors.add(new Triplet<>(-1, 0, factor));
         }
 
         ArrayList<Quartet<Integer, Integer, Integer, Float>> xyzFactors = new ArrayList<>();
         if(fi == 0F) {
+            if(PRINT_SECTOR)
+                System.out.println("0");
             for(Triplet<Integer, Integer, Float> t : xyFactors)
                 xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 0, t.getValue2()));
         } else if(fi > 0F && fi < PI_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("0/A");
             for(Triplet<Integer, Integer, Float> t : xyFactors) {
                 float factor1 = fi/PI_DIV_4;
                 float factor2 = 1F - factor1;
-                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 0, factor1*t.getValue2()));
-                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 1, factor2*t.getValue2()));
+                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 0, factor2*t.getValue2()));
+                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 1, factor1*t.getValue2()));
             }
         } else if(fi == PI_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("A");
             for(Triplet<Integer, Integer, Float> t : xyFactors)
                 xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 1, t.getValue2()));
         } else if(fi > PI_DIV_4 && fi < PI_DIV_2) {
+            if(PRINT_SECTOR)
+                System.out.println("A/B");
             for(Triplet<Integer, Integer, Float> t : xyFactors) {
                 float factor1 = (fi-PI_DIV_4)/PI_DIV_4;
                 float factor2 = 1F - factor1;
-                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 1, factor1*t.getValue2()));
                 xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 1, factor2*t.getValue2()));
+                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 1, factor1*t.getValue2()));
             }
         } else if(fi == PI_DIV_2) {
+            if(PRINT_SECTOR)
+                System.out.println("B");
             xyzFactors.add(new Quartet<>(0, 0, 1, 1F));
         } else if(fi < 0F && fi > -PI_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("0/-A");
             for(Triplet<Integer, Integer, Float> t : xyFactors) {
                 float factor1 = -fi/PI_DIV_4;
                 float factor2 = 1F - factor1;
-                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 0, factor1*t.getValue2()));
-                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), -1, factor2*t.getValue2()));
+                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), 0, factor2*t.getValue2()));
+                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), -1, factor1*t.getValue2()));
             }
         } else if(fi == -PI_DIV_4) {
+            if(PRINT_SECTOR)
+                System.out.println("-A");
             for(Triplet<Integer, Integer, Float> t : xyFactors)
                 xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), -1, t.getValue2()));
         } else if(fi < -PI_DIV_4 && fi > -PI_DIV_2) {
+            if(PRINT_SECTOR)
+                System.out.println("-A/-B");
             for(Triplet<Integer, Integer, Float> t : xyFactors) {
                 float factor1 = (-fi-PI_DIV_4)/PI_DIV_4;
                 float factor2 = 1F - factor1;
-                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), -1, factor1*t.getValue2()));
                 xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), -1, factor2*t.getValue2()));
+                xyzFactors.add(new Quartet<>(t.getValue0(), t.getValue1(), -1, factor1*t.getValue2()));
             }
         } else if(fi == -PI_DIV_2) {
+            if(PRINT_SECTOR)
+                System.out.println("-B");
             xyzFactors.add(new Quartet<>(0, 0, -1, 1F));
         }
 
         byte iNeiB, jNeiB, kNeiB;
         ArrayList<Quartet<Byte, Byte, Byte, Float>> xyzFactorsWithoutBuildings = new ArrayList<>();
+
+
+
         float sum = 0F;
-        
+
         for(Quartet<Integer, Integer, Integer, Float> quartet : xyzFactors) {
             iNeiB = (byte)(int)quartet.getValue0();
             jNeiB = (byte)(int)quartet.getValue1();
