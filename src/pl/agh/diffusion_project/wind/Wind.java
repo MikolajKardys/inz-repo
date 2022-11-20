@@ -242,43 +242,36 @@ public class Wind {
             xyzFactorsWithIndexes.add(new Quartet<>(iNeiS, jNeiS, kNeiS, quartet.getValue3()/sum));
         }
 
-        float toOne = 0F;
-        for(Quartet<Short, Short, Short, Float> quartet : xyzFactorsWithIndexes) {
-            iNeiS = quartet.getValue0();
-            jNeiS = quartet.getValue1();
-            kNeiS = quartet.getValue2();
-
-            toOne += quartet.getValue3()/sum;
-        }
-        //if(toOne != 1F)
-        //    System.out.println(i + " " + j + " " + k + " " +toOne);
-
         return xyzFactorsWithIndexes;
+    }
+
+    private boolean neighbourExists(int i, int j, int k, int iNei, int jNei, int kNei) {
+        return i+iNei >= 0 && j+jNei >= 0 && k+kNei >= 0 && i+iNei < dx && j+jNei < dy && k+kNei < dz;
     }
 
     private float getAngle(float x, float y) {
         return (float)Math.atan2(y, x);
     }
 
-    public void updateWind(float[][][] oldPollutions, float[][][] newPollutions) {
+    public void windPollutions(float[][][] oldPollutions, float[][][] newPollutions) {
         for (int i = 0; i < dx; i++) {
             for (int j = 0; j < dy; j++) {
                 for (int k = 0; k < dz; k++) {
-                    distributeMicroWind(oldPollutions, newPollutions, i, j, k);
+                    distributePollutionsByWind(oldPollutions, newPollutions, i, j, k);
                 }
             }
         }
         for (int i = 0; i < dx; i++) {
             for (int j = 0; j < dy; j++) {
                 for (int k = 0; k < dz; k++) {
-                    updateMicroWind(oldPollutions, newPollutions, i, j, k);
+                    updatePollutionsByWind(oldPollutions, newPollutions, i, j, k);
                 }
             }
         }
     }
 
-    private void distributeMicroWind(float[][][] oldPollutions, float[][][] newPollutions,
-                                     int i, int j, int k) {
+    private void distributePollutionsByWind(float[][][] oldPollutions, float[][][] newPollutions,
+                                            int i, int j, int k) {
         incrementor[i][j][k] += windSpeed[i][j][k];
         if(incrementor[i][j][k] >= MAX_WIND_SPEED) {
             float total = oldPollutions[i][j][k];
@@ -289,16 +282,12 @@ public class Wind {
         }
     }
 
-    private void updateMicroWind(float[][][] oldPollutions, float[][][] newPollutions,
-                                 int i, int j, int k) {
+    private void updatePollutionsByWind(float[][][] oldPollutions, float[][][] newPollutions,
+                                        int i, int j, int k) {
         if(incrementor[i][j][k] >= MAX_WIND_SPEED) {
             oldPollutions[i][j][k] += newPollutions[i][j][k];
             newPollutions[i][j][k] = 0F;
             incrementor[i][j][k] -= MAX_WIND_SPEED;
         }
-    }
-    
-    private boolean neighbourExists(int i, int j, int k, int iNei, int jNei, int kNei) {
-        return i+iNei >= 0 && j+jNei >= 0 && k+kNei >= 0 && i+iNei < dx && j+jNei < dy && k+kNei < dz;
     }
 }

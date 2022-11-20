@@ -1,7 +1,6 @@
 package pl.agh.diffusion_project;
 
 
-import pl.agh.diffusion_project.adapters.VisualizationAdapter;
 import pl.agh.diffusion_project.obstacles.ObstaclesLoader;
 import pl.agh.diffusion_project.wind.Wind;
 import pl.agh.diffusion_project.wind.WindLoader;
@@ -86,7 +85,7 @@ public class TestGenerateBuilding {
         //System.out.println(0);
         //printNonZero(oldTab);
         for (int i = 0; i < iterNumber; i++){
-            wind.updateWind(oldTab, newPollutions);
+            wind.windPollutions(oldTab, newPollutions);
             //saveConcentration(oldTab, vizAdapter.getPollutionDataPath(i + 1));
             System.out.println(i+1);
             printSum(oldTab);
