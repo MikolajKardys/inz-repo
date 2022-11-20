@@ -242,13 +242,16 @@ public class Wind {
             xyzFactorsWithIndexes.add(new Quartet<>(iNeiS, jNeiS, kNeiS, quartet.getValue3()/sum));
         }
 
-        /*float toOne = 0F;
+        float toOne = 0F;
         for(Quartet<Short, Short, Short, Float> quartet : xyzFactorsWithIndexes) {
-            toOne += quartet.getValue3();
+            iNeiS = quartet.getValue0();
+            jNeiS = quartet.getValue1();
+            kNeiS = quartet.getValue2();
+
+            toOne += quartet.getValue3()/sum;
         }
-        if(Math.abs(toOne - 1F) > 0.00000001F) {
-            System.out.println(i + " " + j + " " + k + " " + toOne);
-        }*/
+        //if(toOne != 1F)
+        //    System.out.println(i + " " + j + " " + k + " " +toOne);
 
         return xyzFactorsWithIndexes;
     }
@@ -278,11 +281,11 @@ public class Wind {
                                      int i, int j, int k) {
         incrementor[i][j][k] += windSpeed[i][j][k];
         if(incrementor[i][j][k] >= MAX_WIND_SPEED) {
+            float total = oldPollutions[i][j][k];
             for(Quartet<Short, Short, Short, Float> q : neighborsFactors[i][j][k]) {
-                newPollutions[q.getValue0()][q.getValue1()][q.getValue2()] += q.getValue3() * oldPollutions[i][j][k];
+                newPollutions[q.getValue0()][q.getValue1()][q.getValue2()] += q.getValue3() * total;
+                oldPollutions[i][j][k] -= q.getValue3()*total;
             }
-            if(neighborsFactors[i][j][k].size() > 0)
-                oldPollutions[i][j][k] = 0F;
         }
     }
 

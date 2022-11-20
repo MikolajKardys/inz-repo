@@ -44,7 +44,7 @@ public class TestGenerateBuilding {
         for (int i = 0; i < x; i++){
             for (int j = 0; j < y; j++){
                 for (int k = 0; k < z; k++){
-                    if (p[i][j][k] > 0){
+                    if (p[i][j][k] > 0.8){
                         System.out.println(i + " " + j + " " + k + " " + p[i][j][k]);
                     }
                 }
@@ -57,10 +57,10 @@ public class TestGenerateBuilding {
         int y = p[0].length;
         int z = p[0][0].length;
         float sum = 0F;
-        for (int i = 0; i < x; i++){
-            for (int j = 0; j < y; j++){
-                for (int k = 0; k < z; k++){
-                    sum+=p[i][j][k];
+        for (int i = 0; i < x; i++) {
+            for (int j = 0; j < y; j++) {
+                for (int k = 0; k < z; k++) {
+                    sum += p[i][j][k];
                 }
             }
         }
@@ -80,14 +80,18 @@ public class TestGenerateBuilding {
         float[][][] newPollutions = new float[windLoader.getDx()+2][windLoader.getDy()+2][windLoader.getDz()+1];
         float[][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
 
-        oldTab[0][0][0] = 1.0f;
+        oldTab[50][0][0] = 1.0f;
 
-        int iterNumber = 25;
+        int iterNumber = 100;
         //System.out.println(0);
         //printNonZero(oldTab);
         for (int i = 0; i < iterNumber; i++){
             wind.updateWind(oldTab, newPollutions);
             //saveConcentration(oldTab, vizAdapter.getPollutionDataPath(i + 1));
+            System.out.println(i+1);
+            printSum(oldTab);
+            //printNonZero(oldTab);
+            oldTab[50][0][0] = 1.0f;
         }
 
         /*
