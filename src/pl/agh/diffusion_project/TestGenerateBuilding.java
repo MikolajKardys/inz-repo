@@ -13,65 +13,63 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class TestGenerateBuilding {
-    private static void saveConcentration(float [][][] p, String fileName) {
+    public static void saveConcentration(float [][][] oldVal, float [][][] newVal, String fileName) {
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName, false))) {
-            int x = p.length;
-            int y = p[0][0].length;
-            int z = p[0].length;
+            int x = oldVal[0].length;
+            int y = oldVal[0][0].length;
+            int z = oldVal.length;
 
             out.writeInt(x);
             out.writeInt(y);
             out.writeInt(z);
 
+            byte [] bytes = new byte[4 * x * y * z];
             for (int i = 0; i < x; i++) {
                 for (int j = 0; j < y; j++) {
                     for (int k = 0; k < z; k++) {
-                        out.writeFloat(p[i][k][j]);
+                        int bits = Float.floatToIntBits(oldVal[k][i][j] + newVal[k][i][j]);
+
+                        int index = (i * y * z + j * z + k) * 4;
+
+                        bytes[index + 3] = (byte)(bits & 0xff);
+                        bytes[index + 2] = (byte)((bits >> 8) & 0xff);
+                        bytes[index + 1] = (byte)((bits >> 16) & 0xff);
+                        bytes[index] = (byte)((bits >> 24) & 0xff);
                     }
                 }
             }
+            out.write(bytes);
+
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void printNonZero(float [][][] p) {
-        int x = p.length;
-        int y = p[0].length;
-        int z = p[0][0].length;
-
-        for (int i = 0; i < x; i++){
-            for (int j = 0; j < y; j++){
-                for (int k = 0; k < z; k++){
-                    if (p[i][j][k] > 0){
-                        System.out.println(i + " " + j + " " + k + " " + p[i][j][k]);
-                    }
-                }
+    private static void placeWall(float[][][] oldTab){
+        for (int i = 0; i < 150; i++){
+            for (int j = 0; j < 50; j++){
+                for (int k = 0; k < 5; k++)
+                    oldTab[i][k][j] = 0.3f;
             }
         }
-    }
-
-    private static void printSum(float [][][] p) {
-        int x = p.length;
-        int y = p[0].length;
-        int z = p[0][0].length;
-        float sum = 0F;
-        for (int i = 0; i < x; i++){
-            for (int j = 0; j < y; j++){
-                for (int k = 0; k < z; k++){
-                    sum+=p[i][j][k];
-                }
-            }
-        }
-        System.out.println(sum);
     }
 
     public static void main(String[] args) throws Exception {
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
+        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("testowy.bmp", 50);
+        VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
+        obstacleLoader.saveInDataFile(vizAdapter.getBuildingDataPath());
+        /*
+
+        Properties prop = new Properties();
+        prop.load(new FileInputStream("resources/config.properties"));
 
         ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("testowy.bmp", 50);
+        VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
+
+        vizAdapter.clearIterations();
 
         WindLoader windLoader = WindLoader.loadWindFromFile("testowy-v8-d0-1000-velocity");
 
@@ -80,17 +78,23 @@ public class TestGenerateBuilding {
         float[][][] newPollutions = new float[windLoader.getDx()+2][windLoader.getDy()+2][windLoader.getDz()+1];
         float[][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
 
-        oldTab[0][0][0] = 1.0f;
+        placeWall(oldTab);
 
-        int iterNumber = 25;
-        //System.out.println(0);
-        //printNonZero(oldTab);
+        int iterNumber = 200;
+
+        saveConcentration(oldTab, newPollutions, vizAdapter.getPollutionDataPath(0));
+
+        System.out.println(0);
         for (int i = 0; i < iterNumber; i++){
             wind.updateWind(oldTab, newPollutions);
-            //saveConcentration(oldTab, vizAdapter.getPollutionDataPath(i + 1));
+            saveConcentration(oldTab, newPollutions, vizAdapter.getPollutionDataPath(i + 1));
+            System.out.println(i + 1);
         }
 
-        /*
+        vizAdapter.generateConfig(iterNumber + 1);
+        obstacleLoader.saveInDataFile(vizAdapter.getBuildingDataPath());
+
+
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
 
