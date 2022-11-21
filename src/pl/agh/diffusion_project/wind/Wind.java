@@ -44,11 +44,51 @@ public class Wind {
                         MAX_WIND_SPEED = speed;
 
                     neighborsFactors[i][j][k] = getNeighborsFactors(i, j, k, vector);
-                    /*if(i == 0 && j == 18 && k == 0) {
+                    if(i == 0 && j == 1 && k == 0) {
                         System.out.println(vector);
                         System.out.println(getNeighborsFactors(i, j, k, vector));
                         System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
-                    }*/
+                    }
+                    if(i == 0 && j == 2 && k == 0) {
+                        System.out.println(vector);
+                        System.out.println(getNeighborsFactors(i, j, k, vector));
+                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
+                    }
+                    if(i == 0 && j == 3 && k == 0) {
+                        System.out.println(vector);
+                        System.out.println(getNeighborsFactors(i, j, k, vector));
+                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
+                    }
+                    if(i == 1 && j == 1 && k == 0) {
+                        System.out.println(vector);
+                        System.out.println(getNeighborsFactors(i, j, k, vector));
+                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
+                    }
+                    if(i == 1 && j == 2 && k == 0) {
+                        System.out.println(vector);
+                        System.out.println(getNeighborsFactors(i, j, k, vector));
+                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
+                    }
+                    if(i == 1 && j == 3 && k == 0) {
+                        System.out.println(vector);
+                        System.out.println(getNeighborsFactors(i, j, k, vector));
+                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
+                    }
+                    if(i == 2 && j == 1 && k == 0) {
+                        System.out.println(vector);
+                        System.out.println(getNeighborsFactors(i, j, k, vector));
+                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
+                    }
+                    if(i == 2 && j == 2 && k == 0) {
+                        System.out.println(vector);
+                        System.out.println(getNeighborsFactors(i, j, k, vector));
+                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
+                    }
+                    if(i == 2 && j == 3 && k == 0) {
+                        System.out.println(vector);
+                        System.out.println(getNeighborsFactors(i, j, k, vector));
+                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
+                    }
                 }
             }
         }

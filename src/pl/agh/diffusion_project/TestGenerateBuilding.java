@@ -70,12 +70,14 @@ public class TestGenerateBuilding {
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
 
-        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("testowy.bmp", 50);
+        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("one.bmp", 50);
 
-        WindLoader windLoader = WindLoader.loadWindFromFile("testowy-v8-d0-1000-velocity");
+        WindLoader windLoader = WindLoader.loadWindFromFile("one-v8-d0-100-velocity");
+        System.out.println(windLoader.getDx());
+        System.out.println(windLoader.getDy());
 
         Wind wind = new Wind(windLoader, obstacleLoader);
-
+/*
         float[][][] newPollutions = new float[windLoader.getDx()+2][windLoader.getDy()+2][windLoader.getDz()+1];
         float[][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
 
@@ -92,7 +94,7 @@ public class TestGenerateBuilding {
             //printNonZero(oldTab);
             oldTab[50][0][0] = 1.0f;
         }
-
+*/
         /*
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
