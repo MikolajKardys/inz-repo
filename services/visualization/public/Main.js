@@ -28,7 +28,7 @@ currentFrame.max = simConfigLoader.pollutionJsonData['iteration-number'];
 
 currentFrame.value = currentFrame.min;
 
-currentFrame.addEventListener('change', (_) => {
+async function changeFrame(_) {
     let currentValue = currentFrame.value;
 
     const min = simConfigLoader.pollutionJsonData['iteration-number'] > 0 ? 1 : 0;
@@ -50,14 +50,13 @@ currentFrame.addEventListener('change', (_) => {
 
     if (parseInt(currentValue) > 0){
         const pollutionFile = simConfigLoader.pollutionJsonData['pollution-files'][parseInt(currentValue) - 1]
-        DataViewLoader.loadDataFrameFromDatFile(pollutionFile).then((dataView) => {
-            SimplePollution.loadPollutionFromDataView(dataView);
 
-            render()
-            animate()
-        })
+        const dataView = await DataViewLoader.loadDataFrameFromDatFile(pollutionFile)
+        SimplePollution.loadPollutionFromDataView(dataView)
     }
-});
+}
+
+currentFrame.addEventListener('change', changeFrame)
 
 document.getElementById('next-frame-button').onclick = function () {
     currentFrame.value = parseInt(currentFrame.value) + 1;
@@ -69,16 +68,17 @@ document.getElementById('previous-frame-button').onclick = function () {
     currentFrame.dispatchEvent(new Event('change'));
 }
 
+document.getElementById('record-button').onclick = function () {
+    startRecording()
+}
+
 if (simConfigLoader.buildingsFile !== ""){
     DataViewLoader.loadDataFrameFromDatFile(simConfigLoader.buildingsFile).then((dataView) => {
         SimpleObstacles.loadObstaclesFromDataView(dataView)
-
-        render()
-        animate()
     });
 }
 
-currentFrame.dispatchEvent(new Event('change'));
+changeFrame()
 
 function initScene(x_dim, y_dim, z_dim) {
     scene = new Scene()
@@ -99,16 +99,15 @@ function initScene(x_dim, y_dim, z_dim) {
 
     controls = new OrbitControls(camera, renderer.domElement);
 
-    //recorder = new CCapture({
-     //   format: 'jpg',
-     //   quality: 99,
-    //});
+    recorder = new CCapture({
+        format: 'gif'
+    });
+
+    animate()
 }
 
 function render(){
     renderer.render( scene, camera );
-
-    // recorder.capture(renderer.domElement)
 }
 
 function animate(){
@@ -119,11 +118,31 @@ function animate(){
     renderer.render( scene, camera );
 }
 
-function startRecorder(){
-    recorder.start()
-}
+async function startRecording(){
+    recorder.start();
 
-function stopRecorder(){
+    /*
+    let current = currentFrame.min
+    while (current <= currentFrame.max){
+        currentFrame.value = current
+
+        changeFrame()
+        render()
+        recorder.capture(renderer.domElement)
+
+        current += 1
+    }*/
+    currentFrame.value = currentFrame.min
+
+    while (parseInt(currentFrame.value) <= currentFrame.max){
+        await changeFrame()
+
+        render()
+        recorder.capture(renderer.domElement)
+
+        currentFrame.value = parseInt(currentFrame.value) + 1
+    }
+
     recorder.stop()
     recorder.save()
 }

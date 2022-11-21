@@ -83,12 +83,12 @@ class SimpleObstacles {
             .concat(buildVertexColorArrayFace("#0059b3"))
             .concat(buildVertexColorArrayFace("#0059b3"))
 
-        const x_offset = x_dim / 2;
+        const x_offset = z_dim / 2;
         const y_offset = y_dim / 2;
-        const z_offset = z_dim / 2;
+        const z_offset = x_dim / 2;
 
         for (let i = 0; i < positions.length; i++) {
-            offsets.push(positions[i].x - x_offset, positions[i].y - y_offset, positions[i].z - z_offset);
+            offsets.push(positions[i].z - z_offset, positions[i].y - y_offset, positions[i].x - x_offset);
             orientations.push(0, 0, 0, 0);
 
             sizesArray.push(sizes[i].x, sizes[i].y, sizes[i].z)

@@ -29,11 +29,11 @@ public class ObstaclesLoader {
     public static ObstaclesLoader loadObstaclesFromBitmap(String fileName, int blockSize, int mapHeight) throws IOException {
         BufferedImage img = ImageIO.read(new File(fileName));
 
-        ObstaclesLoader loader = new ObstaclesLoader(img.getWidth(), img.getHeight(), mapHeight);
+        ObstaclesLoader loader = new ObstaclesLoader(img.getHeight(), img.getWidth(), mapHeight);
 
         for (int i = 0; i < loader.terrainX; i++){
             for  (int j = 0; j < loader.terrainY; j++){
-                int height = (255 - new Color(img.getRGB(i, j)).getBlue()) / blockSize;
+                int height = (255 - new Color(img.getRGB(j, i)).getBlue()) / blockSize;
 
                 if (height > 0){
                     loader.heightMatrix[i][j] = height;
@@ -59,7 +59,7 @@ public class ObstaclesLoader {
                     blockers.add(new SimpleBlocker(
                             i, i + 1,
                             0, height,
-                            j, j + 1
+                            j + 1, j + 2
                     ));
                 }
             }
