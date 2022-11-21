@@ -42,53 +42,15 @@ public class Wind {
 
                     if(speed > MAX_WIND_SPEED)
                         MAX_WIND_SPEED = speed;
+                }
+            }
+        }
 
+        for(int i=0; i<dx; i++) {
+            for(int j=0; j<dy; j++) {
+                for(int k=0; k<dz; k++) {
+                    Triplet<Float, Float, Float> vector = windLoader.getVector(i, j, k);
                     neighborsFactors[i][j][k] = getNeighborsFactors(i, j, k, vector);
-                    if(i == 0 && j == 1 && k == 0) {
-                        System.out.println(vector);
-                        System.out.println(getNeighborsFactors(i, j, k, vector));
-                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
-                    }
-                    if(i == 0 && j == 2 && k == 0) {
-                        System.out.println(vector);
-                        System.out.println(getNeighborsFactors(i, j, k, vector));
-                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
-                    }
-                    if(i == 0 && j == 3 && k == 0) {
-                        System.out.println(vector);
-                        System.out.println(getNeighborsFactors(i, j, k, vector));
-                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
-                    }
-                    if(i == 1 && j == 1 && k == 0) {
-                        System.out.println(vector);
-                        System.out.println(getNeighborsFactors(i, j, k, vector));
-                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
-                    }
-                    if(i == 1 && j == 2 && k == 0) {
-                        System.out.println(vector);
-                        System.out.println(getNeighborsFactors(i, j, k, vector));
-                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
-                    }
-                    if(i == 1 && j == 3 && k == 0) {
-                        System.out.println(vector);
-                        System.out.println(getNeighborsFactors(i, j, k, vector));
-                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
-                    }
-                    if(i == 2 && j == 1 && k == 0) {
-                        System.out.println(vector);
-                        System.out.println(getNeighborsFactors(i, j, k, vector));
-                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
-                    }
-                    if(i == 2 && j == 2 && k == 0) {
-                        System.out.println(vector);
-                        System.out.println(getNeighborsFactors(i, j, k, vector));
-                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
-                    }
-                    if(i == 2 && j == 3 && k == 0) {
-                        System.out.println(vector);
-                        System.out.println(getNeighborsFactors(i, j, k, vector));
-                        System.out.println(obstaclesLoader.isBuilding(i, j+1, k));
-                    }
                 }
             }
         }
@@ -257,6 +219,7 @@ public class Wind {
             iNeiInc = quartet.getValue0();
             jNeiInc = quartet.getValue1();
             kNeiInc = quartet.getValue2();
+
             if((neighbourExists(i, j, k, iNeiInc, jNeiInc, kNeiInc) &&
                     windSpeed[i+iNeiInc][j+jNeiInc][k+kNeiInc] >= 0) ||
                     ((i+iNeiInc < 0 || i+iNeiInc >= dx || j+jNeiInc < 0 || j+jNeiInc >= dy || k+kNeiInc >= dz) && k+kNeiInc >= 0)) {

@@ -35,16 +35,16 @@ public class TestGenerateBuilding {
         }
     }
 
-    private static void printNonZero(float [][][] p) {
-        int x = p.length;
-        int y = p[0].length;
-        int z = p[0][0].length;
+    private static void printNonZero(float [][][] o, float [][][] n) {
+        int x = o.length;
+        int y = o[0].length;
+        int z = o[0][0].length;
 
         for (int i = 0; i < x; i++){
             for (int j = 0; j < y; j++){
                 for (int k = 0; k < z; k++){
-                    if (p[i][j][k] > 0.8){
-                        System.out.println(i + " " + j + " " + k + " " + p[i][j][k]);
+                    if (o[i][j][k] + n[i][j][k] > 0.0){
+                        System.out.println(i + " " + j + " " + k + " " + (o[i][j][k] + n[i][j][k]));
                     }
                 }
             }
@@ -70,31 +70,28 @@ public class TestGenerateBuilding {
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
 
-        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("one.bmp", 50);
+        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("wall.bmp", 50);
 
-        WindLoader windLoader = WindLoader.loadWindFromFile("one-v8-d0-100-velocity");
-        System.out.println(windLoader.getDx());
-        System.out.println(windLoader.getDy());
+        WindLoader windLoader = WindLoader.loadWindFromFile("wall-v8-d0-1000-velocity");
 
         Wind wind = new Wind(windLoader, obstacleLoader);
-/*
+
         float[][][] newPollutions = new float[windLoader.getDx()+2][windLoader.getDy()+2][windLoader.getDz()+1];
-        float[][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
+        float[][][] oldPollutions = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
 
-        oldTab[50][0][0] = 1.0f;
+        oldPollutions[50][0][0] = 1.0f;
 
-        int iterNumber = 100;
+        int iterNumber = 50;
         //System.out.println(0);
-        //printNonZero(oldTab);
+        //printNonZero(oldPollutions, newPollutions);
         for (int i = 0; i < iterNumber; i++){
-            wind.windPollutions(oldTab, newPollutions);
+            wind.windPollutions(oldPollutions, newPollutions);
             //saveConcentration(oldTab, vizAdapter.getPollutionDataPath(i + 1));
-            System.out.println(i+1);
-            printSum(oldTab);
-            //printNonZero(oldTab);
-            oldTab[50][0][0] = 1.0f;
+            //System.out.println(i+1);
+            //printNonZero(oldPollutions, newPollutions);
         }
-*/
+        printNonZero(oldPollutions, newPollutions);
+
         /*
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
