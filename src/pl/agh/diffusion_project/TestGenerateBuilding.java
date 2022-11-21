@@ -78,6 +78,7 @@ public class TestGenerateBuilding {
         float[][][] newPollutions = new float[windLoader.getDx()+2][windLoader.getDy()+2][windLoader.getDz()+1];
         float[][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
 
+<<<<<<< HEAD
         placeWall(oldTab);
 
         int iterNumber = 200;
@@ -89,6 +90,20 @@ public class TestGenerateBuilding {
             wind.updateWind(oldTab, newPollutions);
             saveConcentration(oldTab, newPollutions, vizAdapter.getPollutionDataPath(i + 1));
             System.out.println(i + 1);
+=======
+        oldTab[50][0][0] = 1.0f;
+
+        int iterNumber = 100;
+        //System.out.println(0);
+        //printNonZero(oldTab);
+        for (int i = 0; i < iterNumber; i++){
+            wind.updateWind(oldTab, newPollutions);
+            //saveConcentration(oldTab, vizAdapter.getPollutionDataPath(i + 1));
+            System.out.println(i+1);
+            printSum(oldTab);
+            //printNonZero(oldTab);
+            oldTab[50][0][0] = 1.0f;
+>>>>>>> 9ec860afa408acf1023d5b692de5084c5c4eb270
         }
 
         vizAdapter.generateConfig(iterNumber + 1);
