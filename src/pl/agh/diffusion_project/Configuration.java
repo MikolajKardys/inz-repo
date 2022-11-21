@@ -3,6 +3,7 @@ package pl.agh.diffusion_project;
 import org.javatuples.Quartet;
 import pl.agh.diffusion_project.cells.Mapping;
 import pl.agh.diffusion_project.cells.RefactoredCell;
+import pl.agh.diffusion_project.obstacles.ObstaclesLoader;
 import pl.agh.diffusion_project.obstacles.absorber.Absorber;
 import pl.agh.diffusion_project.obstacles.blocker.Blockers;
 import pl.agh.diffusion_project.obstacles.absorber.Absorbers;
@@ -32,6 +33,10 @@ public class Configuration {
         this.cellsHistory = board.get3DConcentrationMatrix();
     }
 
+    public void addObstacles(ObstaclesLoader obstaclesLoader){
+        board.addObstacles(obstaclesLoader);
+    }
+
     public void setupDiffusion(CallableUpdate callableUpdate) {
         board.setupDiffusion(callableUpdate);
     }
@@ -46,7 +51,7 @@ public class Configuration {
         return board.get3DConcentrationMatrix();
     }
 
-    public void setConcentrationAt(int x, int y, int z, Pollution p) {
-        board.get3DConcentrationMatrix()[x][y][z] = p;
+    public void modConcentrationAt(int x, int y, int z, Pollution p) {
+        board.modConcentrationAt(x, y, z, p);
     }
 }

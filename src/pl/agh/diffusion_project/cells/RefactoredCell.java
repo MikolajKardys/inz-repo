@@ -52,7 +52,7 @@ public class RefactoredCell {
      *
      * @param pollution    pollution by which current pollution is modified
      */
-    public void modPollution(Pollution pollution) {//TODO general mapping
+    public void modPollution(Pollution pollution) {
         this.newPollution.mod(
                 Pollution.fromFull(pollution, mapping.getMappingMatrix(cellType, cellType).size(), mapping.getContainsMatrix(cellType)),
                 mapping.getMappingMatrix(this.cellType, this.cellType));

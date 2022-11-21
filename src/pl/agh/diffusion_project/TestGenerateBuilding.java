@@ -58,13 +58,6 @@ public class TestGenerateBuilding {
     public static void main(String[] args) throws Exception {
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
-        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("testowy.bmp", 50);
-        VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
-        obstacleLoader.saveInDataFile(vizAdapter.getBuildingDataPath());
-        /*
-
-        Properties prop = new Properties();
-        prop.load(new FileInputStream("resources/config.properties"));
 
         ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("testowy.bmp", 50);
         VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
@@ -94,7 +87,7 @@ public class TestGenerateBuilding {
         vizAdapter.generateConfig(iterNumber + 1);
         obstacleLoader.saveInDataFile(vizAdapter.getBuildingDataPath());
 
-
+        /*
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
 

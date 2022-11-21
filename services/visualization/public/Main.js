@@ -7,7 +7,7 @@ import { OrbitControls } from 'orbit-controls'
 import { SimConfigLoader } from "./SimConfigLoader.js";
 import { DataViewLoader } from "./DataViewLoader.js";
 import { SimpleObstacles } from "./SimpleObstacles.js";
-import {SimplePollution} from "./SimplePollution.js";
+import { SimplePollution } from "./SimplePollution.js";
 
 let scene
 let camera
@@ -58,14 +58,14 @@ async function changeFrame(_) {
 
 currentFrame.addEventListener('change', changeFrame)
 
-document.getElementById('next-frame-button').onclick = function () {
+document.getElementById('next-frame-button').onclick = async function () {
     currentFrame.value = parseInt(currentFrame.value) + 1;
-    currentFrame.dispatchEvent(new Event('change'));
+    await changeFrame()
 }
 
-document.getElementById('previous-frame-button').onclick = function () {
+document.getElementById('previous-frame-button').onclick = async function () {
     currentFrame.value = parseInt(currentFrame.value) - 1;
-    currentFrame.dispatchEvent(new Event('change'));
+    await changeFrame()
 }
 
 document.getElementById('record-button').onclick = function () {
@@ -120,18 +120,6 @@ function animate(){
 
 async function startRecording(){
     recorder.start();
-
-    /*
-    let current = currentFrame.min
-    while (current <= currentFrame.max){
-        currentFrame.value = current
-
-        changeFrame()
-        render()
-        recorder.capture(renderer.domElement)
-
-        current += 1
-    }*/
     currentFrame.value = currentFrame.min
 
     while (parseInt(currentFrame.value) <= currentFrame.max){
