@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 //TODO przechowywać różne wektory definiowane na starcie programu
 //TODO każdy program można wykonać na każdym wektorze
@@ -140,6 +141,14 @@ public class Pollution {
 //        }
 //        return this;
 //    }
+    /**
+     * Multiply all pollution values by provided number
+     *
+     * @param value      float by which to multiply
+     */
+    public Pollution factor(final float value) {
+        return new Pollution(this.getAll().stream().map(e -> e * value).collect(Collectors.toList()));
+    }
 
     /**
      * Modifies pollution values.
@@ -148,15 +157,11 @@ public class Pollution {
      * @param mapping      mapping of the parameter pollution to class target pollution
      */
     public void mod(Pollution pollution, List<Pair<Integer, Integer>> mapping) {
-        System.out.println(pollution);
-        System.out.println(mapping);
         List<Float> t = pollution.getFastAll();
-        System.out.println(values);
         for (Pair<Integer, Integer> pair: mapping) {
             int left = pair.getValue0();
             int right = pair.getValue1();
             values.set(right, values.get(right) + t.get(left));
-            System.out.println(values);
         }
     }
 

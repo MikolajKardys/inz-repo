@@ -2,9 +2,12 @@ package pl.agh.diffusion_project.wind;
 
 import org.javatuples.Quartet;
 import org.javatuples.Triplet;
+import pl.agh.diffusion_project.cells.RefactoredCell;
 import pl.agh.diffusion_project.obstacles.ObstaclesLoader;
+import pl.agh.diffusion_project.pollution.Pollution;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class Wind {
     private final int dx, dy, dz;
@@ -257,6 +260,21 @@ public class Wind {
         return (float)Math.atan2(y, x);
     }
 
+    public void updateWind(RefactoredCell [][][] cells, int x, int y, int z) {
+        incrementor[x][y][z] += windSpeed[x][y][z];
+        if(incrementor[x][y][z] >= MAX_WIND_SPEED) {
+            for(Quartet<Short, Short, Short, Float> q : neighborsFactors[x][y][z]) {
+                Pollution lostPollution = cells[x][y][z].getFullCurrentPollution().factor(q.getValue3());
+
+                RefactoredCell neighbour = cells[q.getValue0()][q.getValue1()][q.getValue2()];
+                neighbour.modPollution(lostPollution);
+
+                cells[x][y][z].modPollution(lostPollution.factor(-1F));
+            }
+            incrementor[x][y][z] -= MAX_WIND_SPEED;
+        }
+    }
+/*
     public void updateWind(float[][][] oldPollutions, float[][][] newPollutions) {
         for (int i = 0; i < dx; i++) {
             for (int j = 0; j < dy; j++) {
@@ -280,20 +298,17 @@ public class Wind {
         if(incrementor[i][j][k] >= MAX_WIND_SPEED) {
             for(Quartet<Short, Short, Short, Float> q : neighborsFactors[i][j][k]) {
                 newPollutions[q.getValue0()][q.getValue1()][q.getValue2()] += q.getValue3() * oldPollutions[i][j][k];
+                oldPollutions[i][j][k] -= q.getValue3() * oldPollutions[i][j][k];
             }
-            if(neighborsFactors[i][j][k].size() > 0)
-                oldPollutions[i][j][k] = 0F;
+            incrementor[i][j][k] -= MAX_WIND_SPEED;
         }
     }
 
     private void updateMicroWind(float[][][] oldPollutions, float[][][] newPollutions,
                                  int i, int j, int k) {
-        if(incrementor[i][j][k] >= MAX_WIND_SPEED) {
-            oldPollutions[i][j][k] += newPollutions[i][j][k];
-            newPollutions[i][j][k] = 0F;
-            incrementor[i][j][k] -= MAX_WIND_SPEED;
-        }
-    }
+        oldPollutions[i][j][k] += newPollutions[i][j][k];
+        newPollutions[i][j][k] = 0F;
+    }*/
     
     private boolean neighbourExists(int i, int j, int k, int iNei, int jNei, int kNei) {
         return i+iNei >= 0 && j+jNei >= 0 && k+kNei >= 0 && i+iNei < dx && j+jNei < dy && k+kNei < dz;

@@ -47,9 +47,9 @@ public class TestGenerateBuilding {
     }
 
     private static void placeWall(float[][][] oldTab){
-        for (int i = 0; i < 150; i++){
+        for (int i = 0; i < 5; i++){
             for (int j = 0; j < 50; j++){
-                for (int k = 0; k < 5; k++)
+                for (int k = 0; k < 150; k++)
                     oldTab[i][k][j] = 0.3f;
             }
         }
@@ -79,7 +79,7 @@ public class TestGenerateBuilding {
 
         System.out.println(0);
         for (int i = 0; i < iterNumber; i++){
-            wind.updateWind(oldTab, newPollutions);
+            //wind.updateWind(oldTab, newPollutions);
             saveConcentration(oldTab, newPollutions, vizAdapter.getPollutionDataPath(i + 1));
             System.out.println(i + 1);
         }
