@@ -14,13 +14,17 @@ import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Configuration {
     private final Mapping mapping;
     private final Board board;
     private Pollution[][][] cellsHistory;
     private final int width, length, height;
+
+    private final Map<String, CallableUpdate> updates = new HashMap<>();
 
 
     public Configuration(int width, int length, int height, Mapping mapping) {
@@ -39,6 +43,14 @@ public class Configuration {
 
     public void setupDiffusion(CallableUpdate callableUpdate) {
         board.setupDiffusion(callableUpdate);
+    }
+
+    public void addUpdate(String updateName, CallableUpdate callableUpdate) {
+        this.updates.put(updateName, callableUpdate);
+    }
+
+    public void iterateUpdate(String updateName){
+        this.board.updateWithFunction(this.updates.get(updateName));
     }
 
 

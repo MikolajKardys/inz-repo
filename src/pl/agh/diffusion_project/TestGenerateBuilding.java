@@ -2,7 +2,11 @@ package pl.agh.diffusion_project;
 
 
 import pl.agh.diffusion_project.adapters.VisualizationAdapter;
+import pl.agh.diffusion_project.cells.Mapping;
+import pl.agh.diffusion_project.cells.RefactoredCell;
 import pl.agh.diffusion_project.obstacles.ObstaclesLoader;
+import pl.agh.diffusion_project.pollution.Pollution;
+import pl.agh.diffusion_project.wind.SimpleWindUpdate;
 import pl.agh.diffusion_project.wind.Wind;
 import pl.agh.diffusion_project.wind.WindLoader;
 
@@ -10,14 +14,16 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 public class TestGenerateBuilding {
-    public static void saveConcentration(float [][][] oldVal, float [][][] newVal, String fileName) {
+    public static void saveConcentration(RefactoredCell [][][] p, String fileName) {
         try (DataOutputStream out = new DataOutputStream(new FileOutputStream(fileName, false))) {
-            int x = oldVal[0].length;
-            int y = oldVal[0][0].length;
-            int z = oldVal.length;
+            int x = p[0].length;
+            int y = p[0][0].length;
+            int z = p.length;
 
             out.writeInt(x);
             out.writeInt(y);
@@ -27,7 +33,7 @@ public class TestGenerateBuilding {
             for (int i = 0; i < x; i++) {
                 for (int j = 0; j < y; j++) {
                     for (int k = 0; k < z; k++) {
-                        int bits = Float.floatToIntBits(oldVal[k][i][j] + newVal[k][i][j]);
+                        int bits = Float.floatToIntBits(p[k][i][j].getFullCurrentPollution().getAll().get(0));
 
                         int index = (i * y * z + j * z + k) * 4;
 
@@ -46,11 +52,12 @@ public class TestGenerateBuilding {
         }
     }
 
-    private static void placeWall(float[][][] oldTab){
+    private static void placeWall(Board board){
         for (int i = 0; i < 150; i++){
-            for (int j = 2; j < 3; j++){
-                for (int k = 0; k < 1; k++)
-                    oldTab[i][k][j] = 0.05f;
+            for (int j = 0; j < 1; j++){
+                for (int k = 2; k < 5; k++){
+                    board.modConcentrationAt(i, j, k, new Pollution(List.of(0.1f)));
+                }
             }
         }
     }
@@ -64,27 +71,31 @@ public class TestGenerateBuilding {
 
         vizAdapter.clearIterations();
 
-        WindLoader windLoader = WindLoader.loadWindFromFile("testowy-v8-d0-1000-velocity");
+        SimpleWindUpdate windUpdate = new SimpleWindUpdate();
+        windUpdate.setup("testowy-v8-d0-1000-velocity", obstacleLoader);
 
-        Wind wind = new Wind(windLoader, obstacleLoader);
+        Mapping mapping = new Mapping(2,1,
+                Arrays.asList(List.of(true), List.of(false))
+        );
 
-        float[][][] newPollutions = new float[windLoader.getDx()+2][windLoader.getDy()+2][windLoader.getDz()+1];
-        float[][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
-
-        placeWall(oldTab);
+        RefactoredCell.setMapping(mapping);
+        Board board = new Board(150, 150, 50, mapping);
 
         int iterNumber = 200;
 
-        saveConcentration(oldTab, newPollutions, vizAdapter.getPollutionDataPath(0));
+        placeWall(board);
+
+        saveConcentration(board.cells, vizAdapter.getPollutionDataPath(0));
 
         System.out.println(0);
         for (int i = 0; i < iterNumber; i++){
-            wind.windPollutions(oldTab, newPollutions);
-            saveConcentration(oldTab, newPollutions, vizAdapter.getPollutionDataPath(i + 1));
+            board.updateWithFunction(windUpdate);
+            saveConcentration(board.cells, vizAdapter.getPollutionDataPath(i + 1));
             System.out.println(i + 1);
 
-            if (i % 10 == 9)
-                placeWall(oldTab);
+            if (i % 5 == 4){
+                placeWall(board);
+            }
         }
 
         vizAdapter.generateConfig(iterNumber + 1);

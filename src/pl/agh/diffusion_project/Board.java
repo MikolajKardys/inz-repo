@@ -10,7 +10,7 @@ public class Board {
     private final Integer width;
     private final Integer length;
     private final Integer height;
-    private final RefactoredCell[][][] cells;
+    public final RefactoredCell[][][] cells; // Na chwile
     private final Mapping mapping;
 
     public Board(int width, int length, int height, Mapping mapping){

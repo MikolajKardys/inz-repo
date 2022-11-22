@@ -14,7 +14,7 @@ public class SimpleWindUpdate extends CallableUpdate {
 
     public void setup(String windFileName, ObstaclesLoader obstaclesLoader) {
         try {
-            WindLoader windLoader = WindLoader.loadWindFromFile("testowy-v8-d0-1000-velocity");
+            WindLoader windLoader = WindLoader.loadWindFromFile(windFileName);
 
             this.wind = new Wind(windLoader, obstaclesLoader);
         } catch (IOException e) {
@@ -24,6 +24,6 @@ public class SimpleWindUpdate extends CallableUpdate {
 
     @Override
     public void update(RefactoredCell[][][] cells, Integer x, Integer y, Integer z) {
-        super.update(cells, x, y, z);
+        wind.updateWind(cells, x, y, z);
     }
 }

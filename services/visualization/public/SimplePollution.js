@@ -134,7 +134,7 @@ class SimplePollution {
 
         const array = []
         for (let i = 0; i < x_dim * y_dim * z_dim; i++) {
-            array.push(dataView.getFloat32(12 + i * 4) * 5)
+            array.push(dataView.getFloat32(12 + i * 4))
         }
 
         if (SimplePollution.cubeGeo == null) {
