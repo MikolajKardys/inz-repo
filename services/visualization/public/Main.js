@@ -7,7 +7,7 @@ import { OrbitControls } from 'orbit-controls'
 import { SimConfigLoader } from "./SimConfigLoader.js";
 import { DataViewLoader } from "./DataViewLoader.js";
 import { SimpleObstacles } from "./SimpleObstacles.js";
-import {SimplePollution} from "./SimplePollution.js";
+import { SimplePollution } from "./SimplePollution.js";
 
 let scene
 let camera
@@ -28,7 +28,7 @@ currentFrame.max = simConfigLoader.pollutionJsonData['iteration-number'];
 
 currentFrame.value = currentFrame.min;
 
-currentFrame.addEventListener('change', (_) => {
+async function changeFrame(_) {
     let currentValue = currentFrame.value;
 
     const min = simConfigLoader.pollutionJsonData['iteration-number'] > 0 ? 1 : 0;
@@ -50,35 +50,35 @@ currentFrame.addEventListener('change', (_) => {
 
     if (parseInt(currentValue) > 0){
         const pollutionFile = simConfigLoader.pollutionJsonData['pollution-files'][parseInt(currentValue) - 1]
-        DataViewLoader.loadDataFrameFromDatFile(pollutionFile).then((dataView) => {
-            SimplePollution.loadPollutionFromDataView(dataView);
 
-            render()
-            animate()
-        })
+        const dataView = await DataViewLoader.loadDataFrameFromDatFile(pollutionFile)
+        SimplePollution.loadPollutionFromDataView(dataView)
     }
-});
-
-document.getElementById('next-frame-button').onclick = function () {
-    currentFrame.value = parseInt(currentFrame.value) + 1;
-    currentFrame.dispatchEvent(new Event('change'));
 }
 
-document.getElementById('previous-frame-button').onclick = function () {
+currentFrame.addEventListener('change', changeFrame)
+
+document.getElementById('next-frame-button').onclick = async function () {
+    currentFrame.value = parseInt(currentFrame.value) + 1;
+    await changeFrame()
+}
+
+document.getElementById('previous-frame-button').onclick = async function () {
     currentFrame.value = parseInt(currentFrame.value) - 1;
-    currentFrame.dispatchEvent(new Event('change'));
+    await changeFrame()
+}
+
+document.getElementById('record-button').onclick = function () {
+    startRecording()
 }
 
 if (simConfigLoader.buildingsFile !== ""){
     DataViewLoader.loadDataFrameFromDatFile(simConfigLoader.buildingsFile).then((dataView) => {
         SimpleObstacles.loadObstaclesFromDataView(dataView)
-
-        render()
-        animate()
     });
 }
 
-currentFrame.dispatchEvent(new Event('change'));
+changeFrame()
 
 function initScene(x_dim, y_dim, z_dim) {
     scene = new Scene()
@@ -99,16 +99,15 @@ function initScene(x_dim, y_dim, z_dim) {
 
     controls = new OrbitControls(camera, renderer.domElement);
 
-    //recorder = new CCapture({
-     //   format: 'jpg',
-     //   quality: 99,
-    //});
+    recorder = new CCapture({
+        format: 'gif'
+    });
+
+    animate()
 }
 
 function render(){
     renderer.render( scene, camera );
-
-    // recorder.capture(renderer.domElement)
 }
 
 function animate(){
@@ -119,11 +118,19 @@ function animate(){
     renderer.render( scene, camera );
 }
 
-function startRecorder(){
-    recorder.start()
-}
+async function startRecording(){
+    recorder.start();
+    currentFrame.value = currentFrame.min
 
-function stopRecorder(){
+    while (parseInt(currentFrame.value) <= currentFrame.max){
+        await changeFrame()
+
+        render()
+        recorder.capture(renderer.domElement)
+
+        currentFrame.value = parseInt(currentFrame.value) + 1
+    }
+
     recorder.stop()
     recorder.save()
 }
