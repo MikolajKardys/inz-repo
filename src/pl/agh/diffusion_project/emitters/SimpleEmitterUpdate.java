@@ -8,10 +8,10 @@ import java.io.IOException;
 public class SimpleEmitterUpdate extends CallableUpdate {
     private Emitters emitters;
 
-    public void setup(String emittersFileName) {
+    public void setup(String emittersFileName, float emitFactor) {
         try {
             EmittersLoader emittersLoader = EmittersLoader.loadEmittersFromBitmap(emittersFileName);
-            this.emitters = new Emitters(emittersLoader);
+            this.emitters = new Emitters(emittersLoader, emitFactor);
         } catch (IOException e) {
             e.printStackTrace();
         }

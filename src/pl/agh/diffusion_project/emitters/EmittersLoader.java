@@ -8,12 +8,12 @@ import java.io.IOException;
 
 public class EmittersLoader {
     private final int dx, dy;
-    private final int [][] emitters;
+    private final int [][] pixelsValues;
 
     public EmittersLoader(int dx, int dy) {
         this.dx = dx;
         this.dy = dy;
-        this.emitters = new int[dx][dy];
+        this.pixelsValues = new int[dx][dy];
     }
 
     public static EmittersLoader loadEmittersFromBitmap(String fileName) throws IOException {
@@ -23,8 +23,20 @@ public class EmittersLoader {
 
         for (int i = 0; i < loader.dx; i++)
             for (int j = 0; j < loader.dy; j++)
-                loader.emitters[i][j] = new Color(img.getRGB(j, i)).getBlue();
+                loader.pixelsValues[i][j] = new Color(img.getRGB(j, i)).getBlue();
 
         return loader;
+    }
+
+    public int getDx() {
+        return dx;
+    }
+
+    public int getDy() {
+        return dy;
+    }
+
+    public int getEmitterValue(int i, int j) {
+        return pixelsValues[i][j];
     }
 }
