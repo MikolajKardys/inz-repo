@@ -8,7 +8,7 @@ public abstract class CallableUpdate {
     public static int length = 0;
     public static int height = 0;
 
-    void setup(RefactoredCell[][][] cells, int width, int length, int height, Mapping mapping){}
+    public void setup(RefactoredCell[][][] cells, int width, int length, int height, Mapping mapping){}
 
-    void update(RefactoredCell[][][] cells, Integer x, Integer y, Integer z){}
+    public void update(RefactoredCell[][][] cells, Integer x, Integer y, Integer z){}
 }
