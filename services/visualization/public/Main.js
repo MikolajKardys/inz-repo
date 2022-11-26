@@ -8,6 +8,7 @@ import { SimConfigLoader } from "./SimConfigLoader.js";
 import { DataViewLoader } from "./DataViewLoader.js";
 import { SimpleObstacles } from "./SimpleObstacles.js";
 import { SimplePollution } from "./SimplePollution.js";
+import { SimpleRoads } from "./SimpleRoads.js";
 
 let scene
 let camera

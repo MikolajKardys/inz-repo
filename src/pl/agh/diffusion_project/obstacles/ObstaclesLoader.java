@@ -59,7 +59,7 @@ public class ObstaclesLoader {
                     blockers.add(new SimpleBlocker(
                             i, i + 1,
                             0, height,
-                            j + 1, j + 2
+                            j, j + 1
                     ));
                 }
             }

@@ -26,6 +26,10 @@ public class VisualizationAdapter extends AbstractAdapter{
         return this.vizPath + this.dataPath + "/obstacles.dat";
     }
 
+    public String getRoadDataPath () {
+        return this.vizPath + this.dataPath + "/roads.dat";
+    }
+
     public String getPollutionDataPath (int iteration) {
         return this.vizPath + this.dataPath + String.format("/iterations/results%d.dat", iteration);
     }

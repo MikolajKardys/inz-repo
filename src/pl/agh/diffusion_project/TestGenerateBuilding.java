@@ -81,7 +81,10 @@ public class TestGenerateBuilding {
         RefactoredCell.setMapping(mapping);
         Board board = new Board(150, 150, 50, mapping);
 
-        int iterNumber = 200;
+        //SimpleUpdate diffusionUpdate = new SimpleUpdate();
+        //diffusionUpdate.setup(board.cells, 150, 150, 50, mapping);
+
+        int iterNumber = 300;
 
         placeWall(board);
 
@@ -90,6 +93,8 @@ public class TestGenerateBuilding {
         System.out.println(0);
         for (int i = 0; i < iterNumber; i++){
             board.updateWithFunction(windUpdate);
+            //board.updateWithFunction(diffusionUpdate);
+
             saveConcentration(board.cells, vizAdapter.getPollutionDataPath(i + 1));
             System.out.println(i + 1);
 
@@ -100,89 +105,5 @@ public class TestGenerateBuilding {
 
         vizAdapter.generateConfig(iterNumber + 1);
         obstacleLoader.saveInDataFile(vizAdapter.getBuildingDataPath());
-
-        /*
-        Properties prop = new Properties();
-        prop.load(new FileInputStream("resources/config.properties"));
-
-        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("empty.bmp");
-        VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
-
-        WindLoader windLoader = WindLoader.loadWindFromFile("empty-v8-d0-1000-velocity");
-
-        Wind wind = new Wind(windLoader, obstacleLoader);
-
-        float [][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];
-
-        oldTab[5][5][5] = 1.0f;
-
-        saveConcentration(oldTab, vizAdapter.getPollutionDataPath(0));
-        printNonZero(oldTab);
-        for (int i = 0; i < 20; i++){
-            wind.updateWind(oldTab);
-            System.out.println(i);
-            printNonZero(oldTab);
-            saveConcentration(oldTab, vizAdapter.getPollutionDataPath(i + 1));
-        }
-
-
-        vizAdapter.generateConfig(21, false);
-
-        printNonZero(oldTab);
-        for (int i = 0; i < 10; i++){
-            wind.updateWind(oldTab);
-            printNonZero(oldTab);
-        }
-
-
-        Properties prop = new Properties();
-        prop.load(new FileInputStream("resources/config.properties"));
-
-        WindAdapter windAdapter = new WindAdapter(prop.getProperty("wind_calculator_path"));
-        windAdapter.setParameter("m", "empty.bmp");
-        windAdapter.setParameter("z", "20");
-        windAdapter.setParameter("s", "empty-result");
-
-        windAdapter.calculateWind();
-
-
-        bstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("empty.bmp");
-
-        WindLoader windLoader = WindLoader.loadWindFromFile("empty-v8-d0-100-velocity");
-        Wind wind = new Wind(windLoader, obstacleLoader);
-
-        float [][][] oldTab = new float[windLoader.getDx()][windLoader.getDy()][windLoader.getDz()];O
-
-
-        final String buildingFile = "result-1234.bmp";
-
-        Properties prop = new Properties();
-        prop.load(new FileInputStream("resources/config.properties"));
-
-        FetchBuildingsAdapter buildingAdapter = new FetchBuildingsAdapter(prop.getProperty("fetch_buildings_path"));
-        VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
-        WindAdapter windAdapter = new WindAdapter(prop.getProperty("wind_calculator_path"));
-
-        buildingAdapter.setParameter("lat-range", "0.001");
-        buildingAdapter.setParameter("lon-range", "0.002");
-        //buildingAdapter.setParameter("block-size", "1");
-        buildingAdapter.setParameter("result-file", buildingFile);
-        buildingAdapter.fetchBuildings();
-
-        windAdapter.setParameter("m", "testowy.bmp");
-        windAdapter.setParameter("z", "50");
-        windAdapter.setParameter("v", "8");
-        windAdapter.setParameter("r", "100");
-        windAdapter.setParameter("i", "100");
-        windAdapter.setParameter("d", "0");
-        windAdapter.setParameter("s", "testowy-v8-d0");
-        windAdapter.setParameter("c", "1");
-        //windAdapter.calculateWind();
-
-        ObstaclesLoader loader = ObstaclesLoader.loadObstaclesFromBitmap("testowy.bmp");
-        loader.saveInDataFile(vizAdapter.getBuildingDataPath());
-
-        vizAdapter.runVisualization();
-         */
     }
 }
