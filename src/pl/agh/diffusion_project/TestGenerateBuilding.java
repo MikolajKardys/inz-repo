@@ -4,11 +4,10 @@ package pl.agh.diffusion_project;
 import pl.agh.diffusion_project.adapters.VisualizationAdapter;
 import pl.agh.diffusion_project.cells.Mapping;
 import pl.agh.diffusion_project.cells.RefactoredCell;
+import pl.agh.diffusion_project.emitters.SimpleEmitterUpdate;
 import pl.agh.diffusion_project.obstacles.ObstaclesLoader;
 import pl.agh.diffusion_project.pollution.Pollution;
 import pl.agh.diffusion_project.wind.SimpleWindUpdate;
-import pl.agh.diffusion_project.wind.Wind;
-import pl.agh.diffusion_project.wind.WindLoader;
 
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
@@ -66,41 +65,39 @@ public class TestGenerateBuilding {
         Properties prop = new Properties();
         prop.load(new FileInputStream("resources/config.properties"));
 
-        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("testowy.bmp", 50);
+        ObstaclesLoader obstacleLoader = ObstaclesLoader.loadObstaclesFromBitmap("empty.bmp", 20);
         VisualizationAdapter vizAdapter = new VisualizationAdapter(prop.getProperty("visualization_path"));
 
         vizAdapter.clearIterations();
-
-        SimpleWindUpdate windUpdate = new SimpleWindUpdate();
-        windUpdate.setup("testowy-v8-d0-1000-velocity", obstacleLoader);
 
         Mapping mapping = new Mapping(2,1,
                 Arrays.asList(List.of(true), List.of(false))
         );
 
         RefactoredCell.setMapping(mapping);
-        Board board = new Board(150, 150, 50, mapping);
+        Board board = new Board(20, 20, 20, mapping);
 
-        //SimpleUpdate diffusionUpdate = new SimpleUpdate();
-        //diffusionUpdate.setup(board.cells, 150, 150, 50, mapping);
+        SimpleUpdate diffusionUpdate = new SimpleUpdate();
+        diffusionUpdate.setup(board.cells, 20, 20, 20, mapping);
 
-        int iterNumber = 300;
+        SimpleWindUpdate windUpdate = new SimpleWindUpdate();
+        windUpdate.setup("empty-v8-d0-1000-velocity", obstacleLoader);
 
-        placeWall(board);
+        SimpleEmitterUpdate emitterUpdate = new SimpleEmitterUpdate();
+        emitterUpdate.setup("emiter-test-result.bmp", 0.1f);
+
+        int iterNumber = 20;
 
         saveConcentration(board.cells, vizAdapter.getPollutionDataPath(0));
 
         System.out.println(0);
         for (int i = 0; i < iterNumber; i++){
             board.updateWithFunction(windUpdate);
-            //board.updateWithFunction(diffusionUpdate);
+            board.updateWithFunction(diffusionUpdate);
+            board.updateWithFunction(emitterUpdate);
 
             saveConcentration(board.cells, vizAdapter.getPollutionDataPath(i + 1));
             System.out.println(i + 1);
-
-            if (i % 5 == 4){
-                placeWall(board);
-            }
         }
 
         vizAdapter.generateConfig(iterNumber + 1);

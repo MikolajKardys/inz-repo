@@ -19,9 +19,12 @@ public class Emitters {
     }
 
     public void updateEmitters(RefactoredCell[][][] cells, int x, int y, int z) {
+        RefactoredCell cell = cells[x][y][z];
+
+        cell.modPollution(cell.getFullCurrentPollution()); //Needed for retaining old values
         if(z == 0) {
             Pollution emittedPollution = new Pollution(List.of(pollutants[x][y]));
-            cells[x][y][z].modPollution(emittedPollution);
+            cell.modPollution(emittedPollution);
         }
     }
 }
