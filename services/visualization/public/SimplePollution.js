@@ -1,3 +1,10 @@
+import { InstancedBufferAttribute } from 'three'
+import { BoxBufferGeometry } from 'three'
+import { RawShaderMaterial } from 'three'
+import { DoubleSide } from 'three'
+import { InstancedBufferGeometry } from 'three'
+import { Mesh } from 'three'
+
 import * as THREE from 'three'
 
 import { scene, initScene } from "./Main.js";
@@ -40,9 +47,16 @@ class SimplePollution {
     static cubeColors;
 
     static _addCells(x_dim, y_dim, z_dim, colorArray) {
-        const boxGeo = new THREE.BoxBufferGeometry(1, 1, 1)
+        const extra = new THREE.BoxGeometry(x_dim, y_dim, z_dim)
+        let geo = new THREE.EdgesGeometry( extra ); // or WireframeGeometry( geometry )
+        let mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 2 } );
+        let wireframe = new THREE.LineSegments( geo, mat );
+        wireframe.position.set(-0.5, -0.5, -0.5)
+        scene.add( wireframe );
 
-        SimplePollution.cubeGeo = new THREE.InstancedBufferGeometry()
+        const boxGeo = new BoxBufferGeometry(1, 1, 1)
+
+        SimplePollution.cubeGeo = new InstancedBufferGeometry()
         SimplePollution.cubeGeo.index = boxGeo.index
         SimplePollution.cubeGeo.attributes.position = boxGeo.attributes.position
 
@@ -54,7 +68,7 @@ class SimplePollution {
         const z_offset = z_dim / 2;
 
         for (let i = 0; i < x_dim; i++) {
-            for (let j = 0; j < 100; j++) {
+            for (let j = 0; j < y_dim; j++) {
                 for (let k = 0; k < z_dim; k++) {
                     const x = i - x_offset;
                     const y = j - y_offset;
@@ -65,14 +79,13 @@ class SimplePollution {
                     orientations.push(0, 0, 0, 0);
                 }
             }
-            console.log("test")
         }
 
-        const offsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3);
-        const orientationAttribute = new THREE.InstancedBufferAttribute(new Float32Array(orientations), 4);
+        const offsetAttribute = new InstancedBufferAttribute(new Float32Array(offsets), 3);
+        const orientationAttribute = new InstancedBufferAttribute(new Float32Array(orientations), 4);
 
         SimplePollution.cubeColors = new Float32Array(colorArray)
-        const colorAttribute = new THREE.InstancedBufferAttribute(SimplePollution.cubeColors, 1);
+        const colorAttribute = new InstancedBufferAttribute(SimplePollution.cubeColors, 1);
 
         SimplePollution.cubeGeo.setAttribute('offset', offsetAttribute);
         SimplePollution.cubeGeo.setAttribute('orientation', orientationAttribute);
@@ -80,15 +93,15 @@ class SimplePollution {
         SimplePollution.cubeGeo.setAttribute('color', colorAttribute);
         SimplePollution.cubeGeo.getAttribute('color').needsUpdate = true;
 
-        const material = new THREE.RawShaderMaterial({
+        const material = new RawShaderMaterial({
             vertexShader: SimplePollution._VS,
             fragmentShader: SimplePollution._FS,
-            side: THREE.DoubleSide,
+            side: DoubleSide,
             transparent: true,
             depthWrite: false,
         });
 
-        const cubeMesh = new THREE.Mesh(SimplePollution.cubeGeo, material);
+        const cubeMesh = new Mesh(SimplePollution.cubeGeo, material);
 
         scene.add(cubeMesh);
     }
@@ -104,16 +117,16 @@ class SimplePollution {
             }
         }
 
-        const colorAttribute = new THREE.InstancedBufferAttribute(SimplePollution.cubeColors, 1);
+        const colorAttribute = new InstancedBufferAttribute(SimplePollution.cubeColors, 1);
 
         SimplePollution.cubeGeo.setAttribute('color', colorAttribute);
         SimplePollution.cubeGeo.getAttribute('color').needsUpdate = true;
     }
 
     static loadPollutionFromDataView(dataView){
-        const x_dim = 100
-        const y_dim = 100
-        const z_dim = 100
+        const x_dim = dataView.getInt32(0)
+        const y_dim = dataView.getInt32(4)
+        const z_dim = dataView.getInt32(8)
 
         if (scene == null){
             initScene(x_dim, y_dim, z_dim)
@@ -121,7 +134,7 @@ class SimplePollution {
 
         const array = []
         for (let i = 0; i < x_dim * y_dim * z_dim; i++) {
-            array.push(dataView.getFloat32(12 + i * 4, false))
+            array.push(dataView.getFloat32(12 + i * 4))
         }
 
         if (SimplePollution.cubeGeo == null) {

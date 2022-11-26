@@ -1,9 +1,14 @@
-import * as THREE from 'three'
+import { Scene } from 'three'
+import { PerspectiveCamera } from 'three'
+import { WebGLRenderer } from 'three'
+
 import { OrbitControls } from 'orbit-controls'
 
-import { SimplePollution } from "./SimplePollution.js";
+import { SimConfigLoader } from "./SimConfigLoader.js";
 import { DataViewLoader } from "./DataViewLoader.js";
 import { SimpleObstacles } from "./SimpleObstacles.js";
+import { SimplePollution } from "./SimplePollution.js";
+import { SimpleRoads } from "./SimpleRoads.js";
 
 let scene
 let camera
@@ -11,90 +16,75 @@ let renderer
 let controls
 let recorder
 
-/*
-document.getElementById("files").addEventListener("change", async function (event) {
-    let files = event.target.files;
+let simConfigLoader = await SimConfigLoader.loadFromJsonFile("./data/sim-config.json")
 
-    for (let i = 0; i < files.length; i++) {
-        const reader = new FileReader();
-        reader.readAsArrayBuffer(this.files[i]);
+document.getElementById('total-frames').innerHTML = simConfigLoader.pollutionJsonData['iteration-number'];
 
-        reader.onload = function (e) {
-            const buffer = e.target.result
+let currentFrame = document.getElementById('frame');
+let previousFrameButton = document.getElementById('previous-frame-button');
+let nextFrameButton = document.getElementById('next-frame-button');
 
-            const dataView = new DataView(buffer)
+currentFrame.min = simConfigLoader.pollutionJsonData['iteration-number'] > 0 ? 1 : 0;
+currentFrame.max = simConfigLoader.pollutionJsonData['iteration-number'];
 
-            const x_dim = dataView.getInt32(0, false)
-            const y_dim = dataView.getInt32(4, false)
-            const z_dim = dataView.getInt32(8, false)
+currentFrame.value = currentFrame.min;
 
-            const array = []
-            for (let i = 0; i < x_dim * y_dim * z_dim; i++) {
-                array.push(dataView.getFloat32(12 + i * 4, false))
-            }
+async function changeFrame(_) {
+    let currentValue = currentFrame.value;
 
-            if (SimplePollution.cubeGeo == null) {
-                SimplePollution.addCells(x_dim, y_dim, z_dim, array)
-            } else {
-                SimplePollution.updateCells(x_dim, y_dim, z_dim, array)
-            }
+    const min = simConfigLoader.pollutionJsonData['iteration-number'] > 0 ? 1 : 0;
+    const max = simConfigLoader.pollutionJsonData['iteration-number'];
 
-            render()
-        }
+    previousFrameButton.disabled = false;
+    nextFrameButton.disabled = false;
 
-        console.log(i)
-        //await sleep(100)
+    if (currentValue >= max) {
+        currentValue = max;
+        nextFrameButton.disabled = true;
     }
-}, false);
-
-document.getElementById("save_button").addEventListener("click", function () {
-    stopRecorder()
-}, false)*/
-/*
-document.getElementById("files").addEventListener("change", async function (event) {
-    let file = event.;
-
-
-    const reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-
-    reader.onload = function (e) {
-        const buffer = e.target.result
-
-        const dataView = new DataView(buffer)
-
-        const x_dim = dataView.getInt32(0, false)
-        const y_dim = dataView.getInt32(4, false)
-        const z_dim = dataView.getInt32(8, false)
-
-        const array = []
-        for (let i = 0; i < x_dim * y_dim * z_dim; i++) {
-            array.push(dataView.getFloat32(12 + i * 4, false))
-        }
-
-        if (SimplePollution.cubeGeo == null) {
-            SimplePollution.addCells(x_dim, y_dim, z_dim, array)
-        } else {
-            SimplePollution.updateCells(x_dim, y_dim, z_dim, array)
-        }
-
-        render()
+    if (currentValue <= min) {
+        currentValue = min;
+        previousFrameButton.disabled = true;
     }
 
-}, false);
-*/
+    currentFrame.value = currentValue;
 
-DataViewLoader.loadDataFrameFromDatFile("./data/obstacles.dat").then((dataView) => {
-    SimpleObstacles.loadObstaclesFromDataView(dataView)
+    if (parseInt(currentValue) > 0){
+        const pollutionFile = simConfigLoader.pollutionJsonData['pollution-files'][parseInt(currentValue) - 1]
 
-    render()
-    animate()
-})
+        const dataView = await DataViewLoader.loadDataFrameFromDatFile(pollutionFile)
+        SimplePollution.loadPollutionFromDataView(dataView)
+    }
+}
+
+currentFrame.addEventListener('change', changeFrame)
+
+document.getElementById('next-frame-button').onclick = async function () {
+    currentFrame.value = parseInt(currentFrame.value) + 1;
+    await changeFrame()
+}
+
+document.getElementById('previous-frame-button').onclick = async function () {
+    currentFrame.value = parseInt(currentFrame.value) - 1;
+    await changeFrame()
+}
+
+document.getElementById('record-button').onclick = function () {
+    startRecording()
+}
+
+if (simConfigLoader.buildingsFile !== ""){
+    DataViewLoader.loadDataFrameFromDatFile(simConfigLoader.buildingsFile).then((dataView) => {
+        SimpleObstacles.loadObstaclesFromDataView(dataView)
+    });
+}
+
+changeFrame()
 
 function initScene(x_dim, y_dim, z_dim) {
-    scene = new THREE.Scene()
+    scene = new Scene()
 
-    camera = new THREE.PerspectiveCamera(75, 4 / 3, 1, 2000)
+    camera = new PerspectiveCamera(75, 2, 1, 2000)
 
     camera.position.x = 0
     camera.position.y = 0
@@ -102,24 +92,23 @@ function initScene(x_dim, y_dim, z_dim) {
 
     camera.lookAt(0, 0, 0)
 
-    renderer = new THREE.WebGLRenderer()
-    renderer.setSize(1200, 900)
+    renderer = new WebGLRenderer()
+    renderer.setSize(1500, 750)
     renderer.setClearColor(0xdddddd, 0.3);
 
-    document.body.appendChild(renderer.domElement)
+    document.getElementById('canvas').appendChild(renderer.domElement)
 
     controls = new OrbitControls(camera, renderer.domElement);
 
-    //recorder = new CCapture({
-     //   format: 'jpg',
-     //   quality: 99,
-    //});
+    recorder = new CCapture({
+        format: 'gif'
+    });
+
+    animate()
 }
 
 function render(){
-    renderer.render(scene, camera.position);
-
-    // recorder.capture(renderer.domElement)
+    renderer.render( scene, camera );
 }
 
 function animate(){
@@ -130,11 +119,19 @@ function animate(){
     renderer.render( scene, camera );
 }
 
-function startRecorder(){
-    recorder.start()
-}
+async function startRecording(){
+    recorder.start();
+    currentFrame.value = currentFrame.min
 
-function stopRecorder(){
+    while (parseInt(currentFrame.value) <= currentFrame.max){
+        await changeFrame()
+
+        render()
+        recorder.capture(renderer.domElement)
+
+        currentFrame.value = parseInt(currentFrame.value) + 1
+    }
+
     recorder.stop()
     recorder.save()
 }

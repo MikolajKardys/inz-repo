@@ -4,7 +4,7 @@ import pl.agh.diffusion_project.obstacles.ObstacleTypes;
 
 public class SimpleBlocker extends Blocker {
     public SimpleBlocker(int x1, int x2, int y1, int y2, int z1, int z2) {
-        super(x1, x2, y1, y2, z1, z1);
+        super(x1, x2, y1, y2, z1, z2);
     }
 
     public boolean isBlocked(int x, int y, int z){
