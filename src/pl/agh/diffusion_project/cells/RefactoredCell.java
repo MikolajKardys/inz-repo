@@ -1,6 +1,5 @@
 package pl.agh.diffusion_project.cells;
 
-import org.javatuples.Pair;
 import pl.agh.diffusion_project.pollution.Pollution;
 
 import java.util.List;
@@ -8,6 +7,9 @@ import java.util.List;
 public class RefactoredCell {
 
     private final Integer cellType;
+
+    public float temp;
+    public float newTemp;
 
     private Pollution currentPollution;
     private Pollution newPollution;
@@ -29,18 +31,13 @@ public class RefactoredCell {
     }
 
     public void update(){
-//        System.out.println("newPollution");
-//        System.out.println(newPollution);
-//        System.out.println("currentPollution");
-//        System.out.println(currentPollution);
         Pollution t = currentPollution;
         currentPollution = newPollution;
         newPollution = t;
         newPollution.reset();
-//        System.out.println("newPollution2");
-//        System.out.println(newPollution);
-//        System.out.println("currentPollution2");
-//        System.out.println(currentPollution);
+
+        temp = newTemp;
+        newTemp = 0F;
     }
 
     public static void setMapping(Mapping mapping) {

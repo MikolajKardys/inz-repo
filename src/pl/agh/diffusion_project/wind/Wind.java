@@ -273,6 +273,10 @@ public class Wind {
                 neighbour.modPollution(lostPollution);
 
                 cells[x][y][z].modPollution(lostPollution.factor(-1F));
+
+                float lostTemp = cells[x][y][z].temp * q.getValue3();
+                neighbour.newTemp += lostTemp;
+                cells[x][y][z].newTemp -= lostTemp;
             }
             incrementor[x][y][z] -= MAX_WIND_SPEED;
         }
