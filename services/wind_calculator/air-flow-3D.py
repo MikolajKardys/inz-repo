@@ -14,16 +14,21 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='LBF solver')
     parser.add_argument('-m', '--mask', help='Path to bmp file with buildings mask', required=True)
     parser.add_argument('-z', '--zdim', help='Dimension along z axis (>0)', type=int, required=False, default=80)
-    parser.add_argument('-v', '--vel', help='Inflow wind velocity [m/s] (>0)', type=float, required=True)
-    parser.add_argument('-d', '--dire', help='Inflow wind direction (90 >= _ >= 0)', type=float, required=False,default=0.0)
-    parser.add_argument('-i', '--iter', help='Number of iterations (>0)', type=int, required=False, default=100)
-    parser.add_argument('-r', '--reyn', help='Reynolds number for simulation (>0)', type=float, required=False,default=100.0)
+    parser.add_argument('-v', '--vel', help='Inflow wind velocity [m/s] (>0)', type=float, required=False, default=2.0)
+    parser.add_argument('-d', '--dire', help='Inflow wind direction (90 >= _ >= 0)', type=float, required=False, default=0.0)
+    parser.add_argument('-i', '--iter', help='Number of iterations (>0)', type=int, required=True)
+    parser.add_argument('-r', '--reyn', help='Reynolds number for simulation (>0)', type=float, required=False, default=50.0)
     parser.add_argument('-s', '--res', help='Path to file to save results', required=True)
-    parser.add_argument('-c', '--clen', help='Cell length side', type=float, required=True)
+    parser.add_argument('-c', '--clen', help='Cell length side', type=int, required=False, default=1)
     parser.add_argument('-n', '--indirect', help='Indirect save steps', type=int, required=False, default=-1)
 
+    parser.add_argument('-xmin', '--xmin', help='x min', type=int, required=False)
+    parser.add_argument('-xmax', '--xmax', help='x max', type=int, required=False)
+    parser.add_argument('-ymin', '--ymin', help='y min', type=int, required=False)
+    parser.add_argument('-ymax', '--ymax', help='y max', type=int, required=False)
+
     args = vars(parser.parse_args())
-    if args['zdim'] <= 0 or args['vel'] <= 0 or args['iter'] <= 0 or args['reyn'] <= 0 or args['dire'] < 0 or args['dire'] >= 360:
+    if args['zdim'] <= 0 or args['vel'] <= 0 or args['iter'] <= 0 or args['reyn'] <= 0 or args['dire'] < 0 or args['dire'] >= 360 or args['clen'] <= 0:
         parser.print_help()
         sys.exit()
 
@@ -56,7 +61,7 @@ if __name__ == '__main__':
     for i in range(nx - 2):
         for j in range(ny - 2):
             if bitmap_mask_flipped[i, j] > 0:
-                h = min(nz-1, int(bitmap_mask_flipped[i, j]/args['clen']))
+                h = min(nz-1, 1+int(bitmap_mask_flipped[i, j]/float(args['clen'])))
                 mask[i + 1, j + 1, :h] = np.full(h, True)
 
     obstacle_mask = jnp.array(mask)
@@ -151,6 +156,12 @@ if __name__ == '__main__':
             discrete_velocities_prev[-2, :, :, X_NEGATIVE_VELOCITIES])
         discrete_velocities_prev = discrete_velocities_prev.at[:, -1, :, Y_NEGATIVE_VELOCITIES].set(
             discrete_velocities_prev[:, -2, :, Y_NEGATIVE_VELOCITIES])
+        if wind_dire == 0:
+            discrete_velocities_prev = discrete_velocities_prev.at[0, :, :, X_POSITIVE_VELOCITIES].set(
+                discrete_velocities_prev[1, :, :, X_POSITIVE_VELOCITIES])
+        if wind_dire == 90:
+            discrete_velocities_prev = discrete_velocities_prev.at[:, 0, :, Y_POSITIVE_VELOCITIES].set(
+                discrete_velocities_prev[:, 1, :, Y_POSITIVE_VELOCITIES])
 
         # (2) Determine macroscopic velocities
         density_prev = get_density(discrete_velocities_prev)
@@ -159,10 +170,12 @@ if __name__ == '__main__':
             density_prev)
 
         # (3) Prescribe Inflow Dirichlet BC using Zou/He scheme in 3D:
-        macroscopic_velocities_prev = macroscopic_velocities_prev.at[0, :, :, :].set(
-            VELOCITY_PROFILE[0, :, :, :])
-        macroscopic_velocities_prev = macroscopic_velocities_prev.at[:, 0, :, :].set(
-            VELOCITY_PROFILE[:, 0, :, :])
+        if wind_dire != 0:
+            macroscopic_velocities_prev = macroscopic_velocities_prev.at[0, :, :, :].set(
+                VELOCITY_PROFILE[0, :, :, :])
+        if wind_dire != 90:
+            macroscopic_velocities_prev = macroscopic_velocities_prev.at[:, 0, :, :].set(
+                VELOCITY_PROFILE[:, 0, :, :])
 
         lateral_YZ_densities = get_density(
             jnp.transpose(discrete_velocities_prev[0, :, :, YZ_VELOCITIES], axes=(1, 2, 0)))
@@ -173,10 +186,12 @@ if __name__ == '__main__':
         south_densities = get_density(
             jnp.transpose(discrete_velocities_prev[:, 0, :, Y_NEGATIVE_VELOCITIES], axes=(1, 2, 0)))
 
-        density_prev = density_prev.at[0, :, :].set((lateral_YZ_densities + 2 * left_densities) /
-                                                    (1 - macroscopic_velocities_prev[0, :, :, 0]))
-        density_prev = density_prev.at[:, 0, :].set((lateral_XZ_densities + 2 * south_densities) /
-                                                    (1 - macroscopic_velocities_prev[:, 0, :, 1]))
+        if wind_dire != 0:
+            density_prev = density_prev.at[0, :, :].set((lateral_YZ_densities + 2 * left_densities) /
+                                                        (1 - macroscopic_velocities_prev[0, :, :, 0]))
+        if wind_dire != 90:
+            density_prev = density_prev.at[:, 0, :].set((lateral_XZ_densities + 2 * south_densities) /
+                                                        (1 - macroscopic_velocities_prev[:, 0, :, 1]))
 
         # (4) Compute discrete Equilibria velocities
         equilibrium_discrete_velocities = get_equilibrium_discrete_velocities(
@@ -184,12 +199,14 @@ if __name__ == '__main__':
             density_prev)
 
         # (3) Belongs to the Zou/He scheme
-        discrete_velocities_prev = \
-            discrete_velocities_prev.at[0, :, :, X_POSITIVE_VELOCITIES].set(
-                equilibrium_discrete_velocities[0, :, :, X_POSITIVE_VELOCITIES])
-        discrete_velocities_prev = \
-            discrete_velocities_prev.at[:, 0, :, Y_POSITIVE_VELOCITIES].set(
-                equilibrium_discrete_velocities[:, 0, :, Y_POSITIVE_VELOCITIES])
+        if wind_dire != 0:
+            discrete_velocities_prev = \
+                discrete_velocities_prev.at[0, :, :, X_POSITIVE_VELOCITIES].set(
+                    equilibrium_discrete_velocities[0, :, :, X_POSITIVE_VELOCITIES])
+        if wind_dire != 90:
+            discrete_velocities_prev = \
+                discrete_velocities_prev.at[:, 0, :, Y_POSITIVE_VELOCITIES].set(
+                    equilibrium_discrete_velocities[:, 0, :, Y_POSITIVE_VELOCITIES])
 
         # (5) Collide according to BGK
         discrete_velocities_post_collision = (discrete_velocities_prev - RELAXATION_OMEGA *
@@ -222,7 +239,20 @@ if __name__ == '__main__':
 
     def save(discrete_velocities, iteration, nx, ny, nz):
         file = open(args['res'] + "-" + str(iteration) + "-velocity", "w")
-        file.write(str(nx - 2) + ';' + str(ny - 2) + ';' + str(nz - 2) + '\n')
+
+        x_min = 1
+        x_max = nx - 1
+        y_min = 1
+        y_max = ny - 1
+        if args['xmin'] is not None:
+            x_min = max(args['xmin']+1, 1)
+        if args['xmax'] is not None:
+            x_max = min(args['xmax'], nx - 1)
+        if args['ymin'] is not None:
+            y_min = max(args['ymin']+1, 1)
+        if args['ymax'] is not None:
+            y_max = min(args['ymax'], ny - 1)
+        file.write(str(x_max-x_min) + ';' + str(y_max-y_min) + ';' + str(nz - 2) + '\n')
 
         density = get_density(discrete_velocities)
         macroscopic_velocities = get_macroscopic_velocities(
@@ -250,8 +280,8 @@ if __name__ == '__main__':
             y_coef = 1
             x_coef = -1
 
-        for i in range(1, nx - 1):
-            for j in range(1, ny - 1):
+        for i in range(x_min, x_max):
+            for j in range(y_min, y_max):
                 for k in range(1, nz - 1):
                     if flipped_mask[i, j, k]:
                         file.write("0.0;0.0;0.0 ")

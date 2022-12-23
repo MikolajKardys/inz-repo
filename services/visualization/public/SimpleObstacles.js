@@ -6,9 +6,11 @@ import { BoxBufferGeometry } from 'three'
 import { Mesh } from 'three'
 import { ShaderMaterial } from 'three'
 
-import { scene, initScene } from "./Main.js";
+import {x_dim, y_dim, z_dim, scene, visibleRangeX, visibleRangeY, visibleRangeZ} from "./Main.js";
 
 class SimpleObstacles {
+    static cubeMesh = null;
+
     static  _VS = `
         precision highp float;
         
@@ -43,7 +45,7 @@ class SimpleObstacles {
             gl_FragColor = vec4(v_color, 1.);
         }`
 
-    static _addObstacleGeneric(x_dim, y_dim, z_dim, positions, sizes, types, boxGeo){
+    static _addObstacleGeneric(positions, sizes, boxGeo){
         const hexToRgb = function (hex) {
             let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ? {
@@ -83,15 +85,25 @@ class SimpleObstacles {
             .concat(buildVertexColorArrayFace("#0059b3"))
             .concat(buildVertexColorArrayFace("#0059b3"))
 
-        const x_offset = z_dim / 2;
+        const x_offset = x_dim / 2;
         const y_offset = y_dim / 2;
-        const z_offset = x_dim / 2;
+        const z_offset = z_dim / 2;
 
         for (let i = 0; i < positions.length; i++) {
-            offsets.push(positions[i].z - z_offset, positions[i].y - y_offset, positions[i].x - x_offset);
-            orientations.push(0, 0, 0, 0);
+            let x = -positions[i].z + z_offset;
+            let y = positions[i].y - y_offset;
+            let z = positions[i].x - x_offset;
 
-            sizesArray.push(sizes[i].x, sizes[i].y, sizes[i].z)
+            if (
+                visibleRangeX[0] <= positions[i].z && positions[i].z <= visibleRangeX[1] &&
+                visibleRangeY[0] <= positions[i].y && positions[i].y <= visibleRangeY[1] &&
+                visibleRangeZ[0] <= positions[i].x && positions[i].x <= visibleRangeZ[1]
+            ){
+                offsets.push(x-0.5, y+0.5, z+0.5);
+                orientations.push(0, 0, 0, 0);
+
+                sizesArray.push(sizes[i].x, sizes[i].y, sizes[i].z)
+            }
         }
 
         const offsetAttribute = new InstancedBufferAttribute(new Float32Array(offsets), 3);
@@ -115,43 +127,37 @@ class SimpleObstacles {
         return [cubeGeo, material]
     }
 
-    static _addObstacles(x_dim, y_dim, z_dim, positions, sizes, types) {
+    static _addObstacles(positions, sizes) {
+        if (SimpleObstacles.cubeMesh !== null)
+            scene.remove(SimpleObstacles.cubeMesh)
+
         const boxGeo = new BoxBufferGeometry(1, 1, 1)
 
         let obstacleValues =
-            SimpleObstacles._addObstacleGeneric(x_dim, y_dim, z_dim, positions, sizes, types, boxGeo)
+            SimpleObstacles._addObstacleGeneric(positions, sizes, boxGeo)
 
-        const cubeMesh = new Mesh(obstacleValues[0], obstacleValues[1]);
-        scene.add(cubeMesh);
+        SimpleObstacles.cubeMesh = new Mesh(obstacleValues[0], obstacleValues[1]);
+
+        scene.add(SimpleObstacles.cubeMesh);
     }
 
     static loadObstaclesFromDataView(dataView) {
-        const x_dim = dataView.getInt32(0)
-        const y_dim = dataView.getInt32(4)
-        const z_dim = dataView.getInt32(8)
+        const positions = [];
+        const sizes = [];
 
-        if (scene == null){
-            initScene(x_dim, y_dim, z_dim)
-        }
+        for (let i = 0; i < x_dim; i++){
+            for (let j = 0; j < z_dim; j++){
+                let height = dataView.getInt32(4 * (i * z_dim + j));
 
-        const obstacleNum = dataView.getInt32(12)
-
-        const positions = []
-        const sizes = []
-        const types = []
-
-        for (let i = 0; i < obstacleNum; i++) {
-            const elements = []
-            for (let j = 0; j < 7; j++){
-                elements.push(dataView.getInt32(16 + 4 * (i * 7) + 4 * j))
+                if (height > 0){
+                    positions.push(new Vector3(i, 0, j))
+                    sizes.push(new Vector3(1, height, 1))
+                }
             }
-
-            types.push(elements[0])
-            positions.push(new Vector3(elements[1], elements[3], elements[5]))
-            sizes.push(new Vector3(elements[2] - elements[1], elements[4] - elements[3], elements[6] - elements[5]))
         }
 
-        SimpleObstacles._addObstacles(x_dim, y_dim, z_dim, positions, sizes, types)
+
+        SimpleObstacles._addObstacles(positions, sizes)
     }
 }
 

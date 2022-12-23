@@ -5,9 +5,7 @@ import { DoubleSide } from 'three'
 import { InstancedBufferGeometry } from 'three'
 import { Mesh } from 'three'
 
-import * as THREE from 'three'
-
-import { scene, initScene } from "./Main.js";
+import {x_dim, y_dim, z_dim, scene, visibleRangeX, visibleRangeY, visibleRangeZ, scaleFactor} from "./Main.js";
 
 class SimplePollution {
      static  _VS = `
@@ -46,14 +44,7 @@ class SimplePollution {
     static cubeGeo;
     static cubeColors;
 
-    static _addCells(x_dim, y_dim, z_dim, colorArray) {
-        const extra = new THREE.BoxGeometry(x_dim, y_dim, z_dim)
-        let geo = new THREE.EdgesGeometry( extra ); // or WireframeGeometry( geometry )
-        let mat = new THREE.LineBasicMaterial( { color: 0x000000, linewidth: 2 } );
-        let wireframe = new THREE.LineSegments( geo, mat );
-        wireframe.position.set(-0.5, -0.5, -0.5)
-        scene.add( wireframe );
-
+    static _addCells(colorArray) {
         const boxGeo = new BoxBufferGeometry(1, 1, 1)
 
         SimplePollution.cubeGeo = new InstancedBufferGeometry()
@@ -74,7 +65,7 @@ class SimplePollution {
                     const y = j - y_offset;
                     const z = k - z_offset;
 
-                    offsets.push(x, y, z);
+                    offsets.push(-x-0.5, y+0.5, z+0.5);
 
                     orientations.push(0, 0, 0, 0);
                 }
@@ -106,7 +97,7 @@ class SimplePollution {
         scene.add(cubeMesh);
     }
 
-    static _updateCells(x_dim, y_dim, z_dim, colorArray) {
+    static _updateCells(colorArray) {
         for (let i = 0; i < x_dim; i++) {
             for (let j = 0; j < y_dim; j++) {
                 for (let k = 0; k < z_dim; k++) {
@@ -124,23 +115,29 @@ class SimplePollution {
     }
 
     static loadPollutionFromDataView(dataView){
-        const x_dim = dataView.getInt32(0)
-        const y_dim = dataView.getInt32(4)
-        const z_dim = dataView.getInt32(8)
-
-        if (scene == null){
-            initScene(x_dim, y_dim, z_dim)
-        }
-
         const array = []
-        for (let i = 0; i < x_dim * y_dim * z_dim; i++) {
-            array.push(dataView.getFloat32(12 + i * 4))
+        for (let i = 0; i < x_dim; i++) {
+            for (let j = 0; j < y_dim; j++){
+                for (let k = 0; k < z_dim; k++){
+                    let value = 0;
+
+                    if (
+                        visibleRangeX[0] <= i && i <= visibleRangeX[1] &&
+                        visibleRangeY[0] <= j && j <= visibleRangeY[1] &&
+                        visibleRangeZ[0] <= k && k <= visibleRangeZ[1]
+                    ){
+                        value = dataView.getFloat32((i * y_dim * z_dim + j * z_dim + k) * 4);
+                    }
+
+                    array.push(value * scaleFactor)
+                }
+            }
         }
 
         if (SimplePollution.cubeGeo == null) {
-            SimplePollution._addCells(x_dim, y_dim, z_dim, array)
+            SimplePollution._addCells(array)
         } else {
-            SimplePollution._updateCells(x_dim, y_dim, z_dim, array)
+            SimplePollution._updateCells(array)
         }
     }
 }

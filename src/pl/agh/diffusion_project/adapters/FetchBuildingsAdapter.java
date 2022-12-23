@@ -3,20 +3,16 @@ package pl.agh.diffusion_project.adapters;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FetchBuildingsAdapter extends AbstractAdapter{
+public class FetchBuildingsAdapter extends AbstractAdapter {
     // Parameter format: "word_word"
-    private final Map<String, String> parameters = new HashMap<>();
     private final String execFilePath;
 
     public FetchBuildingsAdapter (String execFilePath){
         this.execFilePath = execFilePath;
     }
 
-    public void setParameter(String key, String value){
-        parameters.put(key, value);
-    }
-
-    public void fetchBuildings() throws Exception {
+    @Override
+    public void runAdapter() throws Exception {
         StringBuilder command = new StringBuilder(execFilePath);
 
         for (String key : parameters.keySet()){

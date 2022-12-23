@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class EmittersAdapter extends AbstractAdapter{
-    private final Map<String, String> parameters = new HashMap<>();
+public class EmittersAdapter extends AbstractAdapter {
     private final String execFilePath;
 
     public EmittersAdapter (String execFilePath){
@@ -16,7 +15,8 @@ public class EmittersAdapter extends AbstractAdapter{
         parameters.put(key, value);
     }
 
-    public void createEmitters() throws Exception {
+    @Override
+    public void runAdapter() throws Exception {
         StringBuilder command = new StringBuilder(execFilePath);
 
         for (String key : parameters.keySet()){

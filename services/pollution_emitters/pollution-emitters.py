@@ -8,16 +8,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Temperature distribution')
     parser.add_argument('-m', '--mask', help='Path to bmp file with roads mask', required=True)
     parser.add_argument('-s', '--save', help='Path to file to save results', required=False)
-    parser.add_argument('-t', '--temperature', help='Temperature', type=float, required=True)
-    parser.add_argument('-z', '--zdimension', help='Dimension along z axis (>0)', type=int, required=False, default=80)
-    parser.add_argument('-c', '--celllength', help='Cell length side', type=float, required=False, default=1)
     parser.add_argument('-k', '--kernelsize', help='Kernel size (must be odd)', type=int, required=False, default=3)
     parser.add_argument('-r', '--redfactor', help='Red channel factor', type=float, required=False, default=100)
     parser.add_argument('-g', '--greenfactor', help='Green channel factor', type=float, required=False, default=40)
     parser.add_argument('-b', '--bluefactor', help='Blue channel factor', type=float, required=False, default=5)
+    parser.add_argument('-t', '--threshold', help='Threshold', type=float, required=False, default=100)
 
     args = vars(parser.parse_args())
-    if args['zdimension'] <= 0 or args['celllength'] <= 0 or args['kernelsize'] <= 0:
+    if args['kernelsize'] <= 0:
         parser.print_help()
         sys.exit()
 
@@ -29,7 +27,6 @@ if __name__ == '__main__':
 
     nx = len(bitmap_image)
     ny = len(bitmap_image[0])
-    nz = int(args['zdimension']) + 1
 
     convoluted = []
     for channel in range(3):
@@ -53,11 +50,15 @@ if __name__ == '__main__':
 
     convoluted_sum = args['redfactor']*convoluted[0] + args['greenfactor']*convoluted[1] + args['bluefactor']*convoluted[2]
     convoluted_max = np.max(convoluted_sum)
-    convoluted_sum = convoluted_sum/convoluted_max
+    print("Max convoluted value", convoluted_max)
+    convoluted_sum = convoluted_sum/args['threshold']
 
-    img = Image.new('L', (nx, ny), "white")
+    img = Image.new('L', (ny, nx), "white")
     pixels = img.load()
     for i in range(nx):
         for j in range(ny):
-            pixels[i, j] = int(255*convoluted_sum[j, i])
-    img.save(args['save'], "bmp")
+            if convoluted_sum[i, j] > 1:
+                pixels[j, i] = int(255)
+            else:
+                pixels[j, i] = int(255*convoluted_sum[i, j])
+    img.save(args['save']+"-k"+str(args['kernelsize'])+".bmp", "bmp")

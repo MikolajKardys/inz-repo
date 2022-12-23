@@ -30,14 +30,12 @@
         <p id="total-frames">0</p>
         <button id="next-frame-button" class="next round" disabled>&#8250;</button>
     </div>
-    <div style="margin-top: 15px; text-align: center;">
-        <button id="record-button">Record</button>
-    </div>
 
     <script type="module" src="SimpleObstacles.js"></script>
     <script type="module" src="SimplePollution.js"></script>
     <script type="module" src="DataViewLoader.js"></script>
     <script type="module" src="SimpleRoads.js"></script>
+    <script type="module" src="WireFrame.js"></script>
 
     <!-- Include WebM Writer if you want to export WebM -->
     <script src="./capture/webm-writer-0.2.0.js"></script>
@@ -62,5 +60,19 @@
     <script src="./capture/CCapture.js"></script>
 
     <script type="module" src="Main.js"></script>
+
+    <div style="margin-top: 15px; text-align: center;">
+        <input class="input" style="width: 70px" type="number" id="xBegin" min="0" max="0" value="0" inputmode="numeric">
+        <input class="input" style="width: 70px" type="number" id="xEnd" min="0" max="0" value="1000" inputmode="numeric">
+        <input class="input" style="width: 70px" type="number" id="yBegin" min="0" max="0" value="0" inputmode="numeric">
+        <input class="input" style="width: 70px" type="number" id="yEnd" min="0" max="0" value="1000" inputmode="numeric">
+        <input class="input" style="width: 70px" type="number" id="zBegin" min="0" max="0" value="0" inputmode="numeric">
+        <input class="input" style="width: 70px" type="number" id="zEnd" min="0" max="0" value="1000" inputmode="numeric">
+        <input class="input" style="width: 70px" type="number" id="scale" min="1" max="1000" value="1" inputmode="numeric">
+        <button id="reload-size">Reload</button>
+    </div>
+    <div style="margin-top: 15px; text-align: center;">
+        <button id="record-button">Record</button>
+    </div>
 </body>
 </html>

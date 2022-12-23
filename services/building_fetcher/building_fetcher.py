@@ -20,18 +20,39 @@ def arg_parse():
                             help='Range of longitude from the starting point (in coordinates)')
     arg_parser.add_argument('--block-size', default=1, type=float, help='Side of discretization unit (in meters)')
 
-    arg_parser.add_argument('--result-file', default="result.bmp", type=str, help='Name of the resulting file')
+    arg_parser.add_argument('--result-file', default="result", type=str, help='Name of the resulting file')
+
+    arg_parser.add_argument('--spin-angle', default=0, type=int, help='Angle of rotation')
+
+    arg_parser.add_argument('--fill-missing', default=False, action=argparse.BooleanOptionalAction,
+                            help='Fill missing data with random values')
 
     return arg_parser
 
 
 class BuildingGetter:
-    BUILDING_LEVEL_HEIGHT = 3
+    DEFAULT_HEIGHT = 10
+    METERS_PER_LEVEL = 3
+    ROAD_TYPES = {
+        "red": ["motorway", "motorway_link", "trunk", "trunk_link"],
+        "green": ["primary", "primary_link", "secondary", "secondary_link"],
+        "blue": ["tertiary", "tertiary_link", "residential"]
+    }
     """
     This class is responsible for fetching building data from an OSM API and returning a useful form
 
     :static_field BUILDING_LEVEL_HEIGHT: An average height of a single building level
     """
+
+    @staticmethod
+    def _get_road_channel(road_type):
+        if road_type in BuildingGetter.ROAD_TYPES["red"]:
+            return 0
+        elif road_type in BuildingGetter.ROAD_TYPES["green"]:
+            return 1
+        elif road_type in BuildingGetter.ROAD_TYPES["blue"]:
+            return 2
+        return -1
 
     @staticmethod
     def _get_height(way):
@@ -42,12 +63,14 @@ class BuildingGetter:
         :return: height of building extracted from tags;
         :float: int
         """
+
         building_height = -1
 
         if 'height' in way.tags.keys():
             building_height = float(way.tags['height'])
         elif 'building:levels' in way.tags.keys():
-            building_height = float(way.tags['building:levels']) * BuildingGetter.BUILDING_LEVEL_HEIGHT
+            levels = way.tags['building:levels'].split(";")[0]
+            building_height = float(levels) * BuildingGetter.METERS_PER_LEVEL
 
         return building_height
 
@@ -97,6 +120,7 @@ class BuildingGetter:
         req_polygons = []
         req_heights = []
         req_roads = []
+        req_road_channels = []
 
         for way in req_result.ways:
             if 'highway' in way.tags.keys():
@@ -104,15 +128,21 @@ class BuildingGetter:
                 for node in way.nodes:
                     line.append((float(node.lon), float(node.lat)))
 
-                req_roads.append(line)
+                road_channel_ind = BuildingGetter._get_road_channel(way.tags["highway"])
+
+                if not road_channel_ind == -1:
+                    req_roads.append(line)
+                    req_road_channels.append(road_channel_ind)
 
             elif 'building' in way.tags.keys() or 'building:part' in way.tags.keys():
                 polygon = []
                 for node in way.nodes:
                     polygon.append((float(node.lon), float(node.lat)))
 
+                building_height = BuildingGetter._get_height(way)
+
                 req_polygons.append(polygon)
-                req_heights.append(BuildingGetter._get_height(way))
+                req_heights.append(building_height)
 
         for relation in req_result.relations:
             if 'building' in relation.tags.keys():
@@ -124,15 +154,14 @@ class BuildingGetter:
                         for node in way.nodes:
                             polygon.append((float(node.lon), float(node.lat)))
 
-                        req_polygons.append(polygon)
-
                         b_height = BuildingGetter._get_height(way)
                         if b_height == -1:
                             b_height = BuildingGetter._get_height(relation)
 
+                        req_polygons.append(polygon)
                         req_heights.append(b_height)
 
-        return req_polygons, req_heights, req_roads
+        return req_polygons, req_heights, req_roads, req_road_channels
 
 
 class PointGrid:
@@ -176,6 +205,16 @@ def translate_coords(old_polygons, start_x, start_y):
     return new_polygons
 
 
+def rotate(point_list, wind_angle):
+    a_tab = [np.array(pl) for pl in point_list]
+
+    theta = np.radians(wind_angle)
+    c, s = np.cos(theta), np.sin(theta)
+    r = np.array(((c, -s), (s, c)))
+
+    return [np.dot(A, r.T) for A in a_tab]
+
+
 if __name__ == "__main__":
     parser = arg_parse()
     args = parser.parse_args()
@@ -186,12 +225,15 @@ if __name__ == "__main__":
     y_int = args.lat_range
     step_size = args.block_size
 
-    print("Fetching polygon dara from server...", end="\r")
-    polygons, heights, roads = BuildingGetter.send_request(y_start, x_start, y_int, x_int)
-    print("Data from server fetched            ")
+    print("Fetching data from server...", end="\r")
+    polygons, heights, roads, road_channels = BuildingGetter.send_request(y_start, x_start, y_int, x_int)
+    print("Data from server fetched    ")
 
     polygons = translate_coords(polygons, x_start, y_start)
     roads = translate_coords(roads, x_start, y_start)
+
+    polygons = rotate(polygons, args.spin_angle)
+    roads = rotate(roads, args.spin_angle)
 
     grid = PointGrid()
     x_dim, y_dim, points = grid.x_dim, grid.y_dim, grid.points
@@ -199,14 +241,17 @@ if __name__ == "__main__":
     result_matrix = np.zeros((x_dim, y_dim)) + [255]
 
     i = 0
-    for poly, height in zip(polygons, heights):
-        print(f"Calculating building-grid intersections in progress; {i}/{len(polygons)} completed", end="\r")
+    intersections = []
+    for poly in polygons:
+        print(f"Calculating building-grid intersections pt.1 in progress; {i}/{len(polygons)} completed", end="\r")
         i += 1
-
         p = Polygon(poly)
+        intersections.append(points.intersection(p))
 
-        result = points.intersection(p)
-
+    i = 0
+    for result, height in zip(intersections, heights):
+        print(f"Calculating building-grid intersections pt.2 in progress; {i}/{len(polygons)} completed", end="\r")
+        i += 1
         if type(result) == MultiPoint:
             result_points = list(zip(*[(point.xy[0][0], point.xy[1][0]) for point in result.geoms]))
 
@@ -222,7 +267,27 @@ if __name__ == "__main__":
                 if old_hue > new_hue:
                     result_matrix[x_ind, y_dim - y_ind - 1] = new_hue
 
-    print(f"Calculating buidling-grid intersections completed; {len(polygons)}/{len(polygons)} completed  ")
+    i = 0
+    print(args)
+    if args.fill_missing:
+        for result in intersections:
+            print(f"Calculating building-grid intersections pt.3 in progress; {i}/{len(polygons)} completed", end="\r")
+            i += 1
+            if type(result) == MultiPoint:
+                result_points = list(zip(*[(point.xy[0][0], point.xy[1][0]) for point in result.geoms]))
+
+                rand_height = (55 * np.random.random() + 200)
+
+                for result_point in result.geoms:
+                    x_ind, y_ind = grid.get_point_index(result_point)
+
+                    new_hue = 255 - rand_height
+                    old_hue = result_matrix[x_ind, y_dim - y_ind - 1]
+
+                    if old_hue == 255:
+                        result_matrix[x_ind, y_dim - y_ind - 1] = new_hue
+
+    print(f"Calculating building-grid intersections completed; {len(polygons)}/{len(polygons)} completed              ")
 
     img = Image.new('L', (x_dim + 2, y_dim + 2), "white")
     pixels = img.load()
@@ -231,18 +296,18 @@ if __name__ == "__main__":
             pixels[i + 1, j + 1] = int(result_matrix[i, j])
 
     file_name = args.result_file
-    img.save(file_name, "bmp")
+    img.save(file_name + ".bmp", "bmp")
 
-    print(f"Results saved to {file_name}")
+    print(f"Results saved to {file_name}.bmp")
 
-    result_matrix = np.zeros((x_dim, y_dim)) + [255]
+    result_matrix = np.zeros((x_dim, y_dim, 3), dtype=int)
 
     i = 0
-    for road in roads:
+    for road, road_channel in zip(roads, road_channels):
         print(f"Calculating road-grid intersections in progress; {i}/{len(roads)} completed", end="\r")
         i += 1
 
-        p = LineString(road).buffer(distance=1, cap_style=2)
+        p = LineString(road).buffer(distance=2, cap_style=2)
 
         result = points.intersection(p)
 
@@ -252,17 +317,16 @@ if __name__ == "__main__":
             for result_point in result.geoms:
                 x_ind, y_ind = grid.get_point_index(result_point)
 
-                result_matrix[x_ind, y_dim - y_ind - 1] = 0
+                result_matrix[x_ind, y_dim - y_ind - 1, road_channel] = 255
 
     print(f"Calculating road-grid intersections completed; {len(roads)}/{len(roads)} completed  ")
 
-    img = Image.new('L', (x_dim + 2, y_dim + 2), "white")
+    img = Image.new('RGB', (x_dim + 2, y_dim + 2))
     pixels = img.load()
     for i in range(x_dim):
         for j in range(y_dim):
-            pixels[i + 1, j + 1] = int(result_matrix[i, j])
+            pixels[i + 1, j + 1] = (result_matrix[i, j, 0], result_matrix[i, j, 1], result_matrix[i, j, 2])
 
-    file_name = args.result_file + "_roads"
-    img.save(file_name, "bmp")
+    img.save(file_name + "_roads.bmp", "bmp")
 
-    print(f"Results saved to {file_name + '_roads'}")
+    print(f"Results saved to {file_name}_roads.bmp")

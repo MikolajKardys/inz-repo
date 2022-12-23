@@ -4,18 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class WindAdapter extends AbstractAdapter {
-    private final Map<String, String> parameters = new HashMap<>();
     private final String execFilePath;
 
     public WindAdapter (String execFilePath){
         this.execFilePath = execFilePath;
     }
 
-    public void setParameter(String key, String value){
-        parameters.put(key, value);
-    }
-
-    public void calculateWind() throws Exception {
+    @Override
+    public void runAdapter() throws Exception {
         StringBuilder command = new StringBuilder(execFilePath);
 
         for (String key : parameters.keySet()){

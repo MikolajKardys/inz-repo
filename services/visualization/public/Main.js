@@ -9,6 +9,7 @@ import { DataViewLoader } from "./DataViewLoader.js";
 import { SimpleObstacles } from "./SimpleObstacles.js";
 import { SimplePollution } from "./SimplePollution.js";
 import { SimpleRoads } from "./SimpleRoads.js";
+import { WireFrame } from "./WireFrame.js";
 
 let scene
 let camera
@@ -16,24 +17,90 @@ let renderer
 let controls
 let recorder
 
-let simConfigLoader = await SimConfigLoader.loadFromJsonFile("./data/sim-config.json")
+let x_dim = 0;
+let y_dim = 0;
+let z_dim = 0;
 
-document.getElementById('total-frames').innerHTML = simConfigLoader.pollutionJsonData['iteration-number'];
+let visibleRangeX = [0, 1000];
+let visibleRangeY = [0, 1000];
+let visibleRangeZ = [0, 1000];
 
-let currentFrame = document.getElementById('frame');
-let previousFrameButton = document.getElementById('previous-frame-button');
-let nextFrameButton = document.getElementById('next-frame-button');
+let scaleFactor = 1;
 
-currentFrame.min = simConfigLoader.pollutionJsonData['iteration-number'] > 0 ? 1 : 0;
-currentFrame.max = simConfigLoader.pollutionJsonData['iteration-number'];
 
-currentFrame.value = currentFrame.min;
+document.getElementById('frame').addEventListener('change', reloadAll)
 
-async function changeFrame(_) {
-    let currentValue = currentFrame.value;
+document.getElementById('next-frame-button').onclick = async function () {
+    let currentFrame = document.getElementById('frame')
+    currentFrame.value = parseInt(currentFrame.value) + 1;
+    await reloadAll()
+}
+
+document.getElementById('previous-frame-button').onclick = async function () {
+    let currentFrame = document.getElementById('frame')
+    currentFrame.value = parseInt(currentFrame.value) - 1;
+    await reloadAll()
+}
+
+document.getElementById('record-button').onclick = function () {
+    startRecording()
+}
+
+document.getElementById('reload-size').onclick = async function () {
+    reloadAll()
+}
+
+async function reloadAll(){
+    // Load all configuration from json
+    let simConfigLoader = await SimConfigLoader.loadFromJsonFile("./data/sim-config.json");
+
+    // Set scene dimensions
+    x_dim = simConfigLoader.dimensions.width;
+    y_dim = simConfigLoader.dimensions.height;
+    z_dim = simConfigLoader.dimensions.length;
+
+    if (scene == null)
+        initScene();
+
+    // Load set ranges and scale
+    visibleRangeX[0] = parseInt(document.getElementById('xBegin').value);
+    visibleRangeX[1] = parseInt(document.getElementById('xEnd').value);
+    visibleRangeY[0] = parseInt(document.getElementById('yBegin').value);
+    visibleRangeY[1] = parseInt(document.getElementById('yEnd').value);
+    visibleRangeZ[0] = parseInt(document.getElementById('zBegin').value);
+    visibleRangeZ[1] = parseInt(document.getElementById('zEnd').value);
+    scaleFactor = parseFloat(document.getElementById('scale').value);
+
+
+    // Add wireframe for reference
+    WireFrame.addWireFrame()
+
+
+    // Load buildings and roads
+    if (simConfigLoader.buildingsFile !== ""){
+        DataViewLoader.loadDataFrameFromDatFile(simConfigLoader.buildingsFile).then((dataView) => {
+            SimpleObstacles.loadObstaclesFromDataView(dataView)
+        });
+    }
+
+    if (simConfigLoader.roadsFile !== ""){
+        DataViewLoader.loadDataFrameFromDatFile(simConfigLoader.roadsFile).then((dataView) => {
+            SimpleRoads.loadRoadsFromDataView(dataView, simConfigLoader.sensors)
+        });
+    }
+
+
+    // Set values for pollution components
+    document.getElementById('total-frames').innerHTML = simConfigLoader.pollutionJsonData['iteration-number'];
+
+    let currentFrame = document.getElementById('frame');
+    let previousFrameButton = document.getElementById('previous-frame-button');
+    let nextFrameButton = document.getElementById('next-frame-button');
 
     const min = simConfigLoader.pollutionJsonData['iteration-number'] > 0 ? 1 : 0;
     const max = simConfigLoader.pollutionJsonData['iteration-number'];
+
+    let currentValue = currentFrame.value;
 
     previousFrameButton.disabled = false;
     nextFrameButton.disabled = false;
@@ -47,41 +114,22 @@ async function changeFrame(_) {
         previousFrameButton.disabled = true;
     }
 
+    currentFrame.min = min;
+    currentFrame.max = max;
     currentFrame.value = currentValue;
 
+
+    // Load pollution
     if (parseInt(currentValue) > 0){
-        const pollutionFile = simConfigLoader.pollutionJsonData['pollution-files'][parseInt(currentValue) - 1]
+        const currentIndex = parseInt(currentValue) - 1
+        const pollutionFile = simConfigLoader.pollutionJsonData['pollution-file-prefix'] + currentIndex + ".dat"
 
         const dataView = await DataViewLoader.loadDataFrameFromDatFile(pollutionFile)
         SimplePollution.loadPollutionFromDataView(dataView)
     }
 }
 
-currentFrame.addEventListener('change', changeFrame)
-
-document.getElementById('next-frame-button').onclick = async function () {
-    currentFrame.value = parseInt(currentFrame.value) + 1;
-    await changeFrame()
-}
-
-document.getElementById('previous-frame-button').onclick = async function () {
-    currentFrame.value = parseInt(currentFrame.value) - 1;
-    await changeFrame()
-}
-
-document.getElementById('record-button').onclick = function () {
-    startRecording()
-}
-
-if (simConfigLoader.buildingsFile !== ""){
-    DataViewLoader.loadDataFrameFromDatFile(simConfigLoader.buildingsFile).then((dataView) => {
-        SimpleObstacles.loadObstaclesFromDataView(dataView)
-    });
-}
-
-changeFrame()
-
-function initScene(x_dim, y_dim, z_dim) {
+function initScene() {
     scene = new Scene()
 
     camera = new PerspectiveCamera(75, 2, 1, 2000)
@@ -103,6 +151,12 @@ function initScene(x_dim, y_dim, z_dim) {
     recorder = new CCapture({
         format: 'gif'
     });
+
+    //const geometry = new SphereGeometry(3, 50, 50, 0, Math.PI * 2, 0, Math.PI * 2);  //Sensor placeholder
+    //const material = new MeshBasicMaterial( { color: 0xff0000 } );
+    //const sphere = new Mesh( geometry, material );
+    //sphere.position.set(z_dim / 2 - 115, -12.5, -x_dim / 2 + 160)
+    //scene.add( sphere );
 
     animate()
 }
@@ -136,4 +190,6 @@ async function startRecording(){
     recorder.save()
 }
 
-export { scene, initScene }
+reloadAll()
+
+export { scene, initScene, x_dim, y_dim, z_dim, visibleRangeX, visibleRangeY, visibleRangeZ, scaleFactor, reloadAll }
