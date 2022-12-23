@@ -1,4 +1,3 @@
 argparse
-sys
 numpy
-PIL
+Pillow
