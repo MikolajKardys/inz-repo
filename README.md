@@ -54,7 +54,7 @@ This part of the application can be executed via the other main command:
 java -jar inz-repo-jar-1.0.0.jar run-simulation
 ```
 
-This command takes no parameters and relies entirely on the contents of a *config.json* which should be placed in the same directory as the *.jar* file before its execution. A sample *config.json* file with all the necessary data files has in provided inside the *example-data* directory. Any config file must consist of the following data:
+This command takes no parameters and relies entirely on the contents of a *config.json* which should be placed in the same directory as the *.jar* file before its execution. A sample *config.json* file with all the necessary data files has been provided inside the *example-data* directory. Any config file must consist of the following data:
 
 - "iterations" - the number of total iterations to be executed; each one corresponds exactly to 0.2 seconds
 - "iterations-save" - iteration interval between every two frames visible inside the visualization
