@@ -1,3 +1,7 @@
+/**
+ * @authors ${Dominik Sulik}; ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project.updates.emitters;
 
 import javax.imageio.ImageIO;

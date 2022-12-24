@@ -5,9 +5,11 @@ import { BoxBufferGeometry } from 'three'
 import { Mesh } from 'three'
 import { ShaderMaterial } from 'three'
 
-import {x_dim, y_dim, z_dim, initScene, scene} from "./Main.js";
+import {x_dim, z_dim, scene, visibleRangeX, visibleRangeZ, visibleRangeY} from "./Main.js";
 
 class SimpleRoads {
+    static roadMesh = null;
+
     static  _VS = `
         precision highp float;
         
@@ -44,6 +46,9 @@ class SimpleRoads {
         }`
 
     static _addRoads(positions, colors) {
+        if (SimpleRoads.roadMesh !== null)
+            scene.remove(SimpleRoads.roadMesh)
+
         const boxGeo = new BoxBufferGeometry(1, 1, 1);
 
         const cubeGeo = new InstancedBufferGeometry();
@@ -60,12 +65,17 @@ class SimpleRoads {
         let colorsArray = [];
 
         for (let i = 0; i < positions.length; i++) {
-            offsets.push(-positions[i].y + z_offset, -12.5, positions[i].x - x_offset);
-            orientations.push(0, 0, 0, 0);
+            if (
+                visibleRangeX[0] <= positions[i].y && positions[i].y <= visibleRangeX[1] &&
+                visibleRangeZ[0] <= positions[i].x && positions[i].x <= visibleRangeZ[1]
+            ){
+                offsets.push(-positions[i].y + z_offset, -12.5, positions[i].x - x_offset);
+                orientations.push(0, 0, 0, 0);
 
-            colorsArray.push(colors[i].x, colors[i].y, colors[i].z)
+                colorsArray.push(colors[i].x, colors[i].y, colors[i].z)
 
-            sizesArray.push(1, 0, 1);
+                sizesArray.push(1, 0, 1);
+            }
         }
 
         const offsetAttribute = new InstancedBufferAttribute(new Float32Array(offsets), 3);
@@ -84,8 +94,8 @@ class SimpleRoads {
             depthTest: true
         });
 
-        const cubeMesh = new Mesh(cubeGeo, material);
-        scene.add(cubeMesh);
+        SimpleRoads.roadMesh = new Mesh(cubeGeo, material);
+        scene.add(SimpleRoads.roadMesh);
     }
 
     static loadRoadsFromDataView(dataView) {

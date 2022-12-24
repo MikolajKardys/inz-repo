@@ -1,7 +1,9 @@
+/**
+ * @authors ${Dominik Sulik}; ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project.adapters;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public class WindAdapter extends AbstractAdapter {
     private final String execFilePath;

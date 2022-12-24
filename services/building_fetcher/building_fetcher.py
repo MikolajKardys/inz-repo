@@ -1,3 +1,7 @@
+"""
+@Author: Mikołaj Kardyś
+"""
+
 import overpy
 from PIL import Image
 import numpy as np

@@ -1,3 +1,7 @@
+/**
+ * @authors ${Mikołaj Kardyś}; ${Dominik Sulik}
+ */
+
 package pl.agh.diffusion_project.adapters;
 
 import java.io.BufferedReader;

@@ -1,3 +1,7 @@
+/**
+ * @author ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project;
 
 import org.json.simple.JSONArray;
@@ -19,7 +23,6 @@ public class Application {
 
     private static JSONObject jsonObject;
 
-    private static EmittersAdapter emittersAdapter;
     private static FetchBuildingsAdapter fetchBuildingsAdapter;
     private static VisualizationAdapter vizAdapter;
     private static WindAdapter windAdapter;
@@ -33,7 +36,6 @@ public class Application {
     }
 
     private static void setupAdapters(){
-        emittersAdapter = new EmittersAdapter((String)((JSONObject)jsonObject.get("adapters")).get("pollution-emitters-path"));
         fetchBuildingsAdapter = new FetchBuildingsAdapter((String)((JSONObject)jsonObject.get("adapters")).get("fetch-buildings-path"));
         vizAdapter = new VisualizationAdapter((String)((JSONObject)jsonObject.get("adapters")).get("visualization-path"));
         windAdapter = new WindAdapter((String)((JSONObject)jsonObject.get("adapters")).get("wind-calculator-path"));
@@ -86,12 +88,10 @@ public class Application {
         System.out.print(iterationNum + "/" + iterationNum);
     }
 
-    private static void runAdapter(String [] args) throws Exception {;
+    private static void runAdapter(String [] args) throws Exception {
         AbstractAdapter runAdapter;
 
         switch (args[1]){
-            case "calculate-emitters" ->
-                runAdapter = emittersAdapter;
             case "fetch-buildings" ->
                 runAdapter = fetchBuildingsAdapter;
             case "run-visualization" ->

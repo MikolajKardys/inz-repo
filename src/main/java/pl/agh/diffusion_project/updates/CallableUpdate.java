@@ -1,6 +1,9 @@
+/**
+ * @authors ${Radosław Bany}; ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project.updates;
 
-import org.json.simple.JSONObject;
 
 import java.util.Map;
 

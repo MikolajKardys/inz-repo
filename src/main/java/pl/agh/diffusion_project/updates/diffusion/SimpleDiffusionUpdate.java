@@ -1,6 +1,9 @@
+/**
+ * @authors ${Radosław Bany}; ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project.updates.diffusion;
 
-import org.json.simple.JSONObject;
 import pl.agh.diffusion_project.infrastructure.CityHolder;
 import pl.agh.diffusion_project.updates.CallableUpdate;
 

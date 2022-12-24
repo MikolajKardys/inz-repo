@@ -1,3 +1,7 @@
+/**
+ * @author ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project.updates.emitters;
 
 import pl.agh.diffusion_project.updates.CallableUpdate;

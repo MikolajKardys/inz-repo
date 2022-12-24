@@ -1,3 +1,7 @@
+/**
+ * @author ${Dominik Sulik}
+ */
+
 package pl.agh.diffusion_project.updates.wind;
 
 import java.io.File;

@@ -1,3 +1,7 @@
+/**
+ * @author ${Radosław Bany}
+ */
+
 package pl.agh.diffusion_project.updates.diffusion;
 
 import org.javatuples.Pair;
