@@ -1,3 +1,7 @@
+/**
+ * @authors ${Dominik Sulik}; ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project.updates.wind;
 
 import pl.agh.diffusion_project.updates.CallableUpdate;

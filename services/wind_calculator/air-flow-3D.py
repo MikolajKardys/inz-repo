@@ -1,3 +1,7 @@
+"""
+@Author: Dominik Sulik
+"""
+
 import sys
 from math import radians, sin, cos
 

@@ -58,12 +58,12 @@ class SimplePollution {
         const y_offset = y_dim / 2;
         const z_offset = z_dim / 2;
 
-        for (let i = 0; i < x_dim; i++) {
+        for (let i = 0; i < z_dim; i++) {
             for (let j = 0; j < y_dim; j++) {
-                for (let k = 0; k < z_dim; k++) {
-                    const x = i - x_offset;
+                for (let k = 0; k < x_dim; k++) {
+                    const x = i - z_offset;
                     const y = j - y_offset;
-                    const z = k - z_offset;
+                    const z = k - x_offset;
 
                     offsets.push(-x-0.5, y+0.5, z+0.5);
 
@@ -98,12 +98,20 @@ class SimplePollution {
     }
 
     static _updateCells(colorArray) {
-        for (let i = 0; i < x_dim; i++) {
+        for (let i = 0; i < z_dim; i++) {
             for (let j = 0; j < y_dim; j++) {
-                for (let k = 0; k < z_dim; k++) {
-                    const index = y_dim * z_dim * i + z_dim * j + k;
-
-                    SimplePollution.cubeColors[index] = colorArray[index]
+                for (let k = 0; k < x_dim; k++) {
+                    const index = y_dim * x_dim * i + x_dim * j + k;
+					
+	
+					if (
+						visibleRangeZ[0] <= k && k <= visibleRangeZ[1] && 
+						visibleRangeX[0] <= i && i <= visibleRangeX[1]
+					){
+						SimplePollution.cubeColors[index] = colorArray[index];
+					} else {
+						SimplePollution.cubeColors[index] = 0;
+					}
                 }
             }
         }
@@ -121,13 +129,7 @@ class SimplePollution {
                 for (let k = 0; k < z_dim; k++){
                     let value = 0;
 
-                    if (
-                        visibleRangeX[0] <= i && i <= visibleRangeX[1] &&
-                        visibleRangeY[0] <= j && j <= visibleRangeY[1] &&
-                        visibleRangeZ[0] <= k && k <= visibleRangeZ[1]
-                    ){
-                        value = dataView.getFloat32((i * y_dim * z_dim + j * z_dim + k) * 4);
-                    }
+                    value = dataView.getFloat32((i * y_dim * z_dim + j * z_dim + k) * 4);
 
                     array.push(value * scaleFactor)
                 }

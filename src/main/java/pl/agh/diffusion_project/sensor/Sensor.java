@@ -1,3 +1,7 @@
+/**
+ * @author ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project.sensor;
 
 import pl.agh.diffusion_project.infrastructure.CityHolder;

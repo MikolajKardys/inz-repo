@@ -1,3 +1,7 @@
+/**
+ * @author ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project.updates.walls;
 
 import org.json.simple.JSONArray;

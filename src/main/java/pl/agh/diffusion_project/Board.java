@@ -1,3 +1,7 @@
+/**
+ * @authors ${Radosław Bany}; ${Mikołaj Kardyś}; ${Dominik Sulik}
+ */
+
 package pl.agh.diffusion_project;
 
 import pl.agh.diffusion_project.infrastructure.CityHolder;

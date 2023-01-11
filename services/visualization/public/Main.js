@@ -21,9 +21,9 @@ let x_dim = 0;
 let y_dim = 0;
 let z_dim = 0;
 
-let visibleRangeX = [0, 1000];
-let visibleRangeY = [0, 1000];
-let visibleRangeZ = [0, 1000];
+let visibleRangeX = [0, 0];
+let visibleRangeY = [0, 0];
+let visibleRangeZ = [0, 0];
 
 let scaleFactor = 1;
 
@@ -65,10 +65,22 @@ async function reloadAll(){
     // Load set ranges and scale
     visibleRangeX[0] = parseInt(document.getElementById('xBegin').value);
     visibleRangeX[1] = parseInt(document.getElementById('xEnd').value);
-    visibleRangeY[0] = parseInt(document.getElementById('yBegin').value);
-    visibleRangeY[1] = parseInt(document.getElementById('yEnd').value);
     visibleRangeZ[0] = parseInt(document.getElementById('zBegin').value);
     visibleRangeZ[1] = parseInt(document.getElementById('zEnd').value);
+
+    visibleRangeY[0] = 0
+    visibleRangeY[1] = y_dim - 1
+
+    visibleRangeX[0] = Math.max(0, visibleRangeX[0]);
+    visibleRangeX[1] = Math.min(z_dim - 1, visibleRangeX[1]);
+    visibleRangeZ[0] = Math.max(0, visibleRangeZ[0]);
+    visibleRangeZ[1] = Math.min(x_dim - 1, visibleRangeZ[1]);
+
+    document.getElementById('xBegin').value = visibleRangeX[0]
+    document.getElementById('xEnd').value = visibleRangeX[1]
+    document.getElementById('zBegin').value = visibleRangeZ[0]
+    document.getElementById('zEnd').value = visibleRangeZ[1]
+
     scaleFactor = parseFloat(document.getElementById('scale').value);
 
 
@@ -174,11 +186,13 @@ function animate(){
 }
 
 async function startRecording(){
-    recorder.start();
+    let currentFrame = document.getElementById('frame');
     currentFrame.value = currentFrame.min
 
+    recorder.start();
+
     while (parseInt(currentFrame.value) <= currentFrame.max){
-        await changeFrame()
+        await reloadAll()
 
         render()
         recorder.capture(renderer.domElement)

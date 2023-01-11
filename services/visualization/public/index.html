@@ -62,16 +62,23 @@
     <script type="module" src="Main.js"></script>
 
     <div style="margin-top: 15px; text-align: center;">
-        <input class="input" style="width: 70px" type="number" id="xBegin" min="0" max="0" value="0" inputmode="numeric">
-        <input class="input" style="width: 70px" type="number" id="xEnd" min="0" max="0" value="1000" inputmode="numeric">
-        <input class="input" style="width: 70px" type="number" id="yBegin" min="0" max="0" value="0" inputmode="numeric">
-        <input class="input" style="width: 70px" type="number" id="yEnd" min="0" max="0" value="1000" inputmode="numeric">
+        <p>Width range: from </p>
         <input class="input" style="width: 70px" type="number" id="zBegin" min="0" max="0" value="0" inputmode="numeric">
+        <p> to </p>
         <input class="input" style="width: 70px" type="number" id="zEnd" min="0" max="0" value="1000" inputmode="numeric">
-        <input class="input" style="width: 70px" type="number" id="scale" min="1" max="1000" value="1" inputmode="numeric">
-        <button id="reload-size">Reload</button>
     </div>
     <div style="margin-top: 15px; text-align: center;">
+        <p>Height range: from </p>
+        <input class="input" style="width: 70px" type="number" id="xBegin" min="0" max="0" value="0" inputmode="numeric">
+        <p> to </p>
+        <input class="input" style="width: 70px" type="number" id="xEnd" min="0" max="0" value="1000" inputmode="numeric">
+    </div>
+    <div style="margin-top: 15px; text-align: center;">
+        <p>Visual coefficient: </p>
+        <input class="input" style="width: 70px" type="number" id="scale" min="1" max="1000" value="1" inputmode="numeric">
+    </div>
+    <div style="margin-top: 15px; text-align: center;">
+        <button id="reload-size">Reload</button>
         <button id="record-button">Record</button>
     </div>
 </body>

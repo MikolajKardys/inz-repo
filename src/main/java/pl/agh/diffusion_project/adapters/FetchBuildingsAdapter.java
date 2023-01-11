@@ -1,7 +1,9 @@
+/**
+ * @author ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project.adapters;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public class FetchBuildingsAdapter extends AbstractAdapter {
     // Parameter format: "word_word"

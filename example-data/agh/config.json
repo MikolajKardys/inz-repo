@@ -1,0 +1,47 @@
+{
+  "iterations": 1500,
+  "iterations-save": 5,
+  "dimensions": {
+    "width": 224,
+    "length": 261,
+    "height": 50,
+    "block-size": 2
+  },
+  "data-files": {
+    "buildings-file": "agh-example.bmp",
+    "roads-file": "agh-roads-example.bmp",
+    "emitters-file": "agh-roads-emissions.bmp",
+    "wind-file": "agh-example-v2-d0-1000-velocity"
+  },
+  "updates": {
+    "emitter-timeline": [
+      {
+        "iteration": 0,
+        "concentration": 0.005
+      },
+      {
+        "iteration": 1500,
+        "concentration": 0.005
+      },
+    ],
+    "walls": [
+      "W"
+    ],
+    "wall-timeline": [
+      {
+        "iteration": 0,
+        "concentration": 0.005
+      },
+      {
+        "iteration": 1500,
+        "concentration": 0.005
+      },
+    ]
+  },
+  "adapters": {
+    "fetch-buildings-path": "python3 ./services/building_fetcher/building_fetcher.py",
+    "visualization-path": "./services/visualization",
+    "wind-calculator-path": "python3 ./services/wind_calculator/air-flow-3D.py",
+    "pollution-emitters-path": "python3 ./services/pollution_emitters/pollution-emitters.py"
+  }
+}

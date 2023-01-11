@@ -1,4 +1,9 @@
+/**
+ * @author ${Mikołaj Kardyś}
+ */
+
 package pl.agh.diffusion_project.updates;
+
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
